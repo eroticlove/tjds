@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>津缘</title>
+    <title>津缘 - TJSd Ver1.15.7 最终测试版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -12,11 +12,11 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#0284c7',
-                        primaryHover: '#0369a1',
-                        cream: '#f0f9ff',
+                        primary: '#e11d48',
+                        primaryHover: '#be123c',
+                        cream: '#fff1f2',
                         cardBg: '#ffffff',
-                        borderClr: '#e0f2fe'
+                        borderClr: '#ffe4e6'
                     },
                     fontFamily: {
                         sans: ['"Plus Jakarta Sans"', '"Noto Sans SC"', 'sans-serif']
@@ -26,258 +26,491 @@
         }
     </script>
     <style>
-        body { background-color: #f8fafc; font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif; color: #1e293b; }
-        input[type="range"] { accent-color: #0284c7; }
+        body { background-color: #fafaf9; font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif; color: #1c1917; }
+        input[type="range"] { accent-color: #e11d48; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
     <!-- 顶部导航栏 -->
     <header id="navbar" class="hidden bg-white/90 backdrop-blur-md border-b border-borderClr sticky top-0 z-50 px-6 py-3 flex justify-between items-center shadow-sm">
-        <div class="flex items-center space-x-2">
-            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">津</div>
-            <span class="font-bold text-xl text-primary tracking-wider">津缘 TJSd</span>
-            <span id="system-mode-tag" class="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium ml-2">学生端系统</span>
+        <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateHome()">
+            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">🌸</div>
+            <span class="font-bold text-xl text-primary tracking-wider">TJU Date</span>
+            <span id="system-mode-tag" class="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium ml-2">Ver1.15.7 最终测试版</span>
         </div>
-        <nav id="nav-menu-container" class="hidden md:flex items-center space-x-8 text-sm font-medium">
-            <!-- 动态渲染 -->
+        <nav id="nav-menu-container" class="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <!-- 动态渲染导航 -->
         </nav>
         <div class="flex items-center space-x-4">
-            <span id="user-display-name" class="text-sm font-medium text-gray-700"></span>
-            <button onclick="logout()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition">退出登录</button>
+            <span id="user-display-name" class="text-sm font-medium text-slate-700"></span>
+            <button onclick="logout()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition">退出</button>
         </div>
     </header>
 
     <!-- 主容器 -->
     <main class="flex-grow">
 
-        <!-- 1. 登录与注册页 -->
-        <section id="view-auth" class="min-h-screen flex items-center justify-center p-4 bg-cover bg-center" style="background-image: linear-gradient(rgba(15,23,42,0.45), rgba(15,23,42,0.65)), url('https://img.remit.ee/i/c784YEKLJhxP');">
-            <div class="bg-white/95 backdrop-blur-xl p-8 rounded-2xl shadow-2xl max-w-md w-full border border-white/25">
-                <div class="text-center mb-6">
-                    <div class="w-12 h-12 bg-primary rounded-xl mx-auto flex items-center justify-center text-white font-bold text-xl shadow-lg">津</div>
-                    <h1 class="font-bold text-2xl text-slate-800 mt-3">津缘</h1>
-                    <p class="text-xs text-slate-500 mt-1">天津高校学子专属交友平台</p>
+        <!-- 1. 未登录/访问主页（封面 - 对应图1设计） -->
+        <section id="view-cover" class="min-h-screen flex flex-col justify-between bg-cover bg-center text-slate-800" style="background-image: linear-gradient(rgba(255,255,255,0.75), rgba(255,255,255,0.92)), url('https://img.remit.ee/i/c784YEKLJhxP');">
+            <div class="max-w-4xl mx-auto px-6 py-12 text-center space-y-6">
+                <h1 class="font-extrabold text-4xl md:text-5xl text-slate-900 tracking-tight">
+                    美丽天津 <br><span class="text-primary">等你约会</span>
+                </h1>
+                <p class="text-sm text-slate-600 max-w-md mx-auto">
+                    在万众瞩目下一次折伞，在海棠树下一个回眸，遇见懂你的人。
+                </p>
+                <div class="flex justify-center space-x-4 pt-4">
+                    <button onclick="showAuthMode('register')" class="bg-primary hover:bg-primaryHover text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg transition">注册</button>
+                    <button onclick="showAuthMode('login')" class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 px-8 py-3 rounded-full text-sm font-bold shadow transition">登录</button>
+                </div>
+                <div class="text-xs text-slate-400 pt-2">仅限天津高校学生注册（暂时开放试点）</div>
+            </div>
+
+            <!-- How does it work 步骤说明 -->
+            <div class="max-w-3xl mx-auto px-6 py-10 space-y-8 text-center">
+                <h2 class="font-bold text-2xl text-slate-800">How does it work ?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                    <div class="bg-white/80 p-6 rounded-2xl shadow-sm border border-borderClr space-y-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs">1</div>
+                        <h3 class="font-bold text-slate-800">填写问卷</h3>
+                        <p class="text-xs text-slate-500">回答我们的好习惯、核心价值观与生活颗粒度。</p>
+                    </div>
+                    <div class="bg-white/80 p-6 rounded-2xl shadow-sm border border-borderClr space-y-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs">2</div>
+                        <h3 class="font-bold text-slate-800">每周选择参与</h3>
+                        <p class="text-xs text-slate-500">在每周六下午 12:30 前点击「本周参与」，我们会为你匹配一位契合度高的嘉宾。</p>
+                    </div>
+                    <div class="bg-white/80 p-6 rounded-2xl shadow-sm border border-borderClr space-y-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs">3</div>
+                        <h3 class="font-bold text-slate-800">见面约会</h3>
+                        <p class="text-xs text-slate-500">获取互选联系方式，线下校园散步或喝一杯，约会方式由你自己决定。</p>
+                    </div>
                 </div>
 
-                <div class="flex border-b border-slate-200 mb-6 text-sm font-medium">
-                    <button onclick="switchAuthMode('login')" id="tab-login" class="flex-1 pb-2 text-center border-b-2 border-primary text-primary font-semibold">账号登录</button>
-                    <button onclick="switchAuthMode('register')" id="tab-register" class="flex-1 pb-2 text-center text-slate-400">新用户注册</button>
-                    <button onclick="switchAuthMode('forgot')" id="tab-forgot" class="flex-1 pb-2 text-center text-slate-400">找回密码</button>
-                </div>
-
-                <!-- 登录表单 -->
-                <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">登录邮箱 / 管理员账号</label>
-                        <input type="text" id="login-email" required placeholder="输入您的邮箱或 Admin" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                <!-- 倒计时与统计数据 -->
+                <div class="bg-white/90 p-8 rounded-3xl shadow-sm border border-borderClr space-y-4">
+                    <div class="text-xs text-slate-400">距离本期揭晓倒计时</div>
+                    <div id="countdown-timer" class="font-mono text-2xl font-bold text-primary">02天 19小时 57分钟 52秒</div>
+                    <div class="text-xs text-slate-500">2026年期次倒计时</div>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div class="p-4 bg-slate-50 rounded-2xl"><div class="text-xl font-bold text-slate-800">2,506+</div><div class="text-xs text-slate-500">总填问卷</div></div>
+                        <div class="p-4 bg-slate-50 rounded-2xl"><div class="text-xl font-bold text-slate-800">74%</div><div class="text-xs text-slate-500">顺利牵手率</div></div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">登录密码</label>
-                        <input type="password" id="login-password" required placeholder="请输入密码" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
-                    </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg transition">安全登录系统</button>
-                </form>
-
-                <!-- 注册表单 -->
-                <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">电子邮箱（支持 163/QQ/高校邮箱）</label>
-                        <div class="flex space-x-2">
-                            <input type="email" id="reg-email" required placeholder="name@example.com" class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
-                            <button type="button" onclick="sendRealEmailCode()" id="btn-send-code" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 text-xs rounded-xl transition">发送验证码</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">邮箱 6 位数字验证码</label>
-                        <input type="text" id="reg-code" required placeholder="输入邮件收到的6位验证码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">设置登录密码</label>
-                        <input type="password" id="reg-password" required placeholder="不少于6位安全密码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">所属天津高校</label>
-                        <select id="reg-school" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
-                            <option value="天津大学">天津大学</option>
-                            <option value="南开大学">南开大学</option>
-                            <option value="天津师范大学">天津师范大学</option>
-                            <option value="天津医科大学">天津医科大学</option>
-                            <option value="天津理工大学">天津理工大学</option>
-                            <option value="天津仁爱学院">天津仁爱学院</option>
-                            <option value="其他天津高校">其他天津高校</option>
-                        </select>
-                    </div>
-                    <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <label class="block text-xs font-bold text-primary">学生证明或证件上传（非试点高校用户或无相应邮箱用户）</label>
-                        <input type="file" id="reg-card-file" accept="image/*" onchange="uploadStudentCard(event)" class="text-xs text-slate-500 w-full file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
-                        <input type="hidden" id="reg-card-url">
-                        <div id="upload-status" class="text-xs text-emerald-600 mt-1"></div>
-                    </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg transition">确认注册并进入系统</button>
-                </form>
-
-                <!-- 密码找回表单 -->
-                <form id="form-forgot" onsubmit="handleForgot(event)" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">注册邮箱</label>
-                        <div class="flex space-x-2">
-                            <input type="email" id="forgot-email" required placeholder="输入账号邮箱" class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl">
-                            <button type="button" onclick="sendForgotCode()" class="bg-slate-800 text-white px-3 py-2 text-xs rounded-xl">发验证码</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">邮箱验证码</label>
-                        <input type="text" id="forgot-code" required placeholder="6位验证码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">新密码</label>
-                        <input type="password" id="forgot-new-password" required placeholder="输入新密码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl">
-                    </div>
-                    <button type="submit" class="w-full bg-primary text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg">重置密码并登录</button>
-                </form>
-
-                <div class="mt-6 text-[10px] text-slate-400 text-center leading-relaxed">
-                    Copyright © 2026 TJSd's team All Rights Reserved.
                 </div>
             </div>
+
+            <!-- 登录表单弹窗/视图 -->
+            <div id="auth-modal-container" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative border border-slate-200">
+                    <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+                    <div class="text-center mb-6">
+                        <div class="w-12 h-12 bg-primary rounded-xl mx-auto flex items-center justify-center text-white font-bold text-xl shadow-md">🌸</div>
+                        <h3 class="font-bold text-2xl text-slate-800 mt-2">津缘 TJSd</h3>
+                        <p class="text-xs text-slate-500">校园真诚交友平台</p>
+                    </div>
+                    <div class="flex border-b border-slate-200 mb-6 text-sm font-medium">
+                        <button onclick="switchAuthMode('login')" id="tab-login" class="flex-1 pb-2 text-center border-b-2 border-primary text-primary font-semibold">账号登录</button>
+                        <button onclick="switchAuthMode('register')" id="tab-register" class="flex-1 pb-2 text-center text-slate-400">新用户注册</button>
+                        <button onclick="switchAuthMode('forgot')" id="tab-forgot" class="flex-1 pb-2 text-center text-slate-400">找回密码</button>
+                    </div>
+
+                    <!-- 登录 -->
+                    <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">登录邮箱 / 管理员账号</label>
+                            <input type="text" id="login-email" required placeholder="输入账号或 Admin" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">登录密码</label>
+                            <input type="password" id="login-password" required placeholder="请输入密码" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg transition">安全登录系统</button>
+                    </form>
+
+                    <!-- 注册 -->
+                    <form id="form-register" onsubmit="handleRegister(event)" class="space-y-3 hidden">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">校园电子邮箱 (@tju.edu.cn)</label>
+                            <div class="flex space-x-2">
+                                <input type="email" id="reg-email" required placeholder="name@tju.edu.cn" class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl">
+                                <button type="button" onclick="sendRealEmailCode()" id="btn-send-code" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 text-xs rounded-xl">发验证码</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">6位数字验证码</label>
+                            <input type="text" id="reg-code" required placeholder="输入收到的6位验证码" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">设置密码</label>
+                            <input type="password" id="reg-password" required placeholder="不少于6位密码" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">所属高校</label>
+                            <select id="reg-school" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl">
+                                <option value="天津大学">天津大学</option>
+                                <option value="南开大学">南开大学</option>
+                                <option value="天津师范大学">天津师范大学</option>
+                                <option value="天津理工大学">天津理工大学</option>
+                                <option value="天津医科大学">天津医科大学</option>
+                                <option value="天津仁爱学院">天津仁爱学院</option>
+                                <option value="其他高校">其他高校</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg">确认注册</button>
+                    </form>
+
+                    <!-- 找回密码 -->
+                    <form id="form-forgot" onsubmit="handleForgot(event)" class="space-y-4 hidden">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">注册邮箱</label>
+                            <div class="flex space-x-2">
+                                <input type="email" id="forgot-email" required placeholder="账号邮箱" class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl">
+                                <button type="button" onclick="sendForgotCode()" class="bg-slate-800 text-white px-3 py-2 text-xs rounded-xl">发验证码</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">验证码</label>
+                            <input type="text" id="forgot-code" required placeholder="6位验证码" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">新密码</label>
+                            <input type="password" id="forgot-new-password" required placeholder="新密码" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl">
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg">重置密码并登录</button>
+                    </form>
+                </div>
+            </div>
+
+            <footer class="text-center py-6 text-xs text-slate-400 border-t border-slate-200">
+                Copyright © TJSd's team All Rights Reserved.
+            </footer>
         </section>
 
-        <!-- 2. 学生端 - 首页 -->
+        <!-- 2. 学生端 - 首页概览 -->
         <section id="view-home" class="hidden max-w-4xl mx-auto p-6 space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-4">
                 <h2 class="font-bold text-2xl text-slate-800">你好，<span id="home-nickname" class="text-primary">同学</span></h2>
-                <p class="text-sm text-slate-500 mt-1">当前账号审核状态：<span id="home-audit-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">资料审核中</span></p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr space-y-4">
-                <h3 class="font-bold text-lg text-slate-800">本周匹配与成长计划</h3>
-                <div class="p-4 bg-cream rounded-xl border border-blue-100 flex justify-between items-center">
+                <p class="text-sm text-slate-600">当前账号审核状态：<span id="home-audit-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">审核中</span></p>
+                <div class="p-5 bg-cream rounded-2xl border border-rose-100 flex justify-between items-center mt-4">
                     <div>
-                        <span class="text-xs font-bold text-primary block">本期匹配截止：每周六 12:30</span>
-                        <span id="participation-status-text" class="text-xs text-slate-600 mt-0.5 block">状态：已加入匹配池</span>
+                        <span class="text-xs font-bold text-primary block">本期匹配截止：每周六下午 12:30</span>
+                        <span id="participation-status-text" class="text-xs text-slate-600 mt-1 block">状态：已加入本周匹配池</span>
                     </div>
-                    <button onclick="toggleParticipation()" id="btn-participate" class="bg-primary text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-sm">切换匹配状态</button>
+                    <button onclick="toggleParticipation()" id="btn-participate" class="bg-primary text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition shadow">切换参与状态</button>
                 </div>
             </div>
         </section>
 
-        <!-- 3. 学生端 - 个人问卷编辑页 -->
+        <!-- 3. 学生端 - 47题详细建档认证问卷 (五大模块) -->
         <section id="view-questionnaire" class="hidden max-w-3xl mx-auto p-6 space-y-8">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr">
-                <div class="flex justify-between items-center mb-6 border-b pb-4">
-                    <h2 class="font-bold text-xl text-primary">全方位档案与问卷编辑</h2>
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-6">
+                <div class="flex justify-between items-center border-b pb-4">
+                    <div>
+                        <h2 class="font-bold text-xl text-primary">全方位档案与问卷认证系统</h2>
+                        <p class="text-xs text-slate-500 mt-1">完整填写47项指标，便于智能算法与管理员端精准配对。</p>
+                    </div>
                     <span id="questionnaire-save-tip" class="text-xs text-emerald-600 font-medium"></span>
                 </div>
+
+                <!-- 问卷导航选项卡 -->
+                <div class="flex flex-wrap gap-2 border-b pb-4 text-xs font-semibold">
+                    <button type="button" onclick="switchQTab(1)" id="qtab-btn-1" class="px-4 py-2 rounded-xl bg-primary text-white shadow">1. 基本信息与现实约束</button>
+                    <button type="button" onclick="switchQTab(2)" id="qtab-btn-2" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700">2. 核心价值观与人生方向</button>
+                    <button type="button" onclick="switchQTab(3)" id="qtab-btn-3" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700">3. 生活颗粒度</button>
+                    <button type="button" onclick="switchQTab(4)" id="qtab-btn-4" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700">4. 情感风格</button>
+                    <button type="button" onclick="switchQTab(5)" id="qtab-btn-5" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700">5. 吸引力与预期</button>
+                </div>
+
                 <form id="form-questionnaire" onsubmit="saveQuestionnaire(event)" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- 模块 1：基本信息与现实约束 -->
+                    <div id="qtab-content-1" class="space-y-4">
+                        <h3 class="font-bold text-md text-slate-800">模块一：基本信息与现实约束</h3>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">真实姓名</label>
-                            <input type="text" id="q-real_name" class="w-full px-3 py-2 text-sm border rounded-xl">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">个人宣言 / Bio</label>
+                            <textarea id="q-bio" rows="2" placeholder="写一句自我介绍..." class="w-full p-3 text-xs border rounded-xl"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">真实姓名</label><input type="text" id="q-real_name" class="w-full px-3 py-2 text-sm border rounded-xl"></div>
+                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">昵称</label><input type="text" id="q-nickname" required class="w-full px-3 py-2 text-sm border rounded-xl"></div>
+                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">身高 (cm)</label><input type="number" id="q-height" class="w-full px-3 py-2 text-sm border rounded-xl"></div>
+                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">体重 (kg)</label><input type="number" id="q-weight" class="w-full px-3 py-2 text-sm border rounded-xl"></div>
+                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">年级 / 学历</label><input type="text" id="q-grade" placeholder="如：大二 / 硕士研究生" class="w-full px-3 py-2 text-sm border rounded-xl"></div>
+                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">家乡 / 籍贯</label><input type="text" id="q-hometown" class="w-full px-3 py-2 text-sm border rounded-xl"></div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">昵称</label>
-                            <input type="text" id="q-nickname" required class="w-full px-3 py-2 text-sm border rounded-xl">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">身高 (cm)</label>
-                            <input type="number" id="q-height" class="w-full px-3 py-2 text-sm border rounded-xl">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">联系方式 (微信/手机，匹配成功可见)</label>
-                            <input type="text" id="q-contact_info" required class="w-full px-3 py-2 text-sm border rounded-xl">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">联系方式 (微信/手机号，匹配成功可见)</label>
+                            <input type="text" id="q-contact_info" required placeholder="微信号或手机号" class="w-full px-3 py-2 text-sm border rounded-xl">
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">个人简介与交友宣言 (Bio)</label>
-                        <textarea id="q-bio" rows="3" class="w-full p-3 border rounded-xl text-xs"></textarea>
+
+                    <!-- 模块 2：核心价值观与人生方向 -->
+                    <div id="qtab-content-2" class="space-y-4 hidden">
+                        <h3 class="font-bold text-md text-slate-800">模块二：核心价值观与人生方向</h3>
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">13. 学业 / 事业投入程度 (自己 vs 希望对方)</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>自己: <input type="range" id="q-career_self" min="1" max="10" value="5" class="w-full"></div>
+                                    <div>期望对方: <input type="range" id="q-career_partner" min="1" max="10" value="5" class="w-full"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">14. 稳定 vs 探索 (生活方式)</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>自己: <input type="range" id="q-stability_self" min="1" max="10" value="5" class="w-full"></div>
+                                    <div>期望对方: <input type="range" id="q-stability_partner" min="1" max="10" value="5" class="w-full"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">15. 消费观念 (节约 vs 享受)</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>自己: <input type="range" id="q-consumption_self" min="1" max="10" value="5" class="w-full"></div>
+                                    <div>期望对方: <input type="range" id="q-consumption_partner" min="1" max="10" value="5" class="w-full"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm shadow-md">保存并提交问卷云端</button>
+
+                    <!-- 模块 3：生活颗粒度 -->
+                    <div id="qtab-content-3" class="space-y-4 hidden">
+                        <h3 class="font-bold text-md text-slate-800">模块三：生活颗粒度（作息与习惯）</h3>
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">20. 作息倾向 (早睡早起 vs 夜猫子)</label>
+                                <input type="range" id="q-sleep_habit" min="1" max="10" value="5" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">21. 周末更喜欢怎么过 (出门探索 vs 毛毯休息)</label>
+                                <input type="range" id="q-weekend_habit" min="1" max="10" value="5" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">22. 社交频率</label>
+                                <input type="range" id="q-social_frequency" min="1" max="10" value="5" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">23. 运动习惯</label>
+                                <input type="range" id="q-sports_habit" min="1" max="10" value="5" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块 4：情感风格 -->
+                    <div id="qtab-content-4" class="space-y-4 hidden">
+                        <h3 class="font-bold text-md text-slate-800">模块四：情感风格</h3>
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">28. 当伴侣几小时不回复时，我会感到：</label>
+                                <input type="range" id="q-msg_reply_speed" min="1" max="10" value="5" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">32. 发生冲突时的第一反应：逃避 vs 争吵沟通</label>
+                                <input type="range" id="q-conflict_reaction" min="1" max="10" value="5" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块 5：吸引力与预期 -->
+                    <div id="qtab-content-5" class="space-y-4 hidden">
+                        <h3 class="font-bold text-md text-slate-800">模块五：吸引力与预期</h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">44. 给匹配对象的一句话寄语</label>
+                            <input type="text" id="q-partner_expectations" placeholder="期待遇见有趣的你..." class="w-full px-3 py-2 text-sm border rounded-xl">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between pt-4 border-t">
+                        <button type="button" onclick="prevQTab()" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-semibold">上一步</button>
+                        <button type="submit" class="px-6 py-2 bg-primary text-white rounded-xl text-xs font-semibold shadow">保存并同步云端档案</button>
+                        <button type="button" onclick="nextQTab()" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-semibold">下一步</button>
+                    </div>
                 </form>
             </div>
         </section>
 
         <!-- 4. 匹配揭晓页 -->
         <section id="view-reveal" class="hidden max-w-2xl mx-auto p-6 space-y-6">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr space-y-6 text-center">
-                <div class="w-16 h-16 bg-blue-50 text-primary rounded-full flex items-center justify-center mx-auto text-2xl font-bold">🎡</div>
-                <h2 class="font-bold text-2xl text-slate-800">本周匹配揭晓专区（天津之眼主题）</h2>
-                <p class="text-xs text-slate-500">每周六下午 12:30 准时进行智能双向配对。</p>
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-6 text-center">
+                <div class="w-16 h-16 bg-rose-50 text-primary rounded-full flex items-center justify-center mx-auto text-2xl font-bold">🎡</div>
+                <h2 class="font-bold text-2xl text-slate-800">本周匹配揭晓专区</h2>
+                <p class="text-xs text-slate-500">每周六下午 12:00 准时公开双向契合结果。</p>
             </div>
         </section>
 
-        <!-- 5. 我的认证页 -->
-        <section id="view-verify" class="hidden max-w-2xl mx-auto p-6 space-y-6">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr space-y-6">
-                <h2 class="font-bold text-xl text-primary">高校身份与人工认证状态</h2>
-                <div class="space-y-4 text-sm">
-                    <div class="p-4 bg-slate-50 rounded-xl flex justify-between items-center">
-                        <span class="text-slate-600">注册邮箱</span>
-                        <span id="verify-email" class="font-semibold text-slate-800"></span>
+        <!-- 5. 公告与反馈板块 (合一) -->
+        <section id="view-announcements" class="hidden max-w-3xl mx-auto p-6 space-y-8">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-6">
+                <h2 class="font-bold text-2xl text-slate-800 border-b pb-3">公告与反馈中心</h2>
+                
+                <!-- 公告列表 -->
+                <div class="space-y-4">
+                    <h3 class="font-bold text-md text-primary">最新系统公告</h3>
+                    <div id="announcement-list" class="space-y-3">
+                        <!-- 动态加载公告 -->
                     </div>
-                    <div class="p-4 bg-slate-50 rounded-xl flex justify-between items-center">
-                        <span class="text-slate-600">认证审核状态</span>
-                        <span id="verify-status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">审核中</span>
-                    </div>
+                </div>
+
+                <!-- 反馈表单 -->
+                <div class="pt-6 border-t space-y-4">
+                    <h3 class="font-bold text-md text-primary">意见与诉求反馈</h3>
+                    <form onsubmit="submitFeedback(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">反馈类型选择</label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                <label class="flex items-center space-x-1 p-2 border rounded-xl cursor-pointer"><input type="radio" name="fb-type" value="网站建议" checked><span>网站建议</span></label>
+                                <label class="flex items-center space-x-1 p-2 border rounded-xl cursor-pointer"><input type="radio" name="fb-type" value="Bug反馈"><span>Bug反馈</span></label>
+                                <label class="flex items-center space-x-1 p-2 border rounded-xl cursor-pointer"><input type="radio" name="fb-type" value="举报"><span>举报</span></label>
+                                <label class="flex items-center space-x-1 p-2 border rounded-xl cursor-pointer"><input type="radio" name="fb-type" value="注销账号"><span>注销账号</span></label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">反馈详细内容（管理员可见您的邮箱与诉求）</label>
+                            <textarea id="fb-content" rows="3" required placeholder="请详细描述您的建议、Bug或注销/举报原因..." class="w-full p-3 text-xs border rounded-xl focus:outline-none focus:border-primary"></textarea>
+                        </div>
+                        <button type="submit" class="bg-primary hover:bg-primaryHover text-white px-6 py-2.5 rounded-xl text-xs font-semibold shadow">提交反馈</button>
+                    </form>
                 </div>
             </div>
         </section>
 
-        <!-- 6. 管理系统 -->
+        <!-- 6. 关于板块 -->
+        <section id="view-about" class="hidden max-w-3xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-6">
+                <h2 class="font-bold text-2xl text-slate-800 border-b pb-3">关于 TJU Date</h2>
+                <div class="space-y-4 text-sm text-slate-600 leading-relaxed">
+                    <p><strong>TJU Date</strong> 是面向天津高校学生的校园匹配平台，我们相信：不是多遇见人，而是遇见更合适的人。</p>
+                    <h3 class="font-bold text-slate-800 text-md mt-4">怎么玩</h3>
+                    <p>完成一次问卷（基本信息、核心价值观与偏好），之后每周三下午 14:00 前可选择「本周参与」。我们会为参与的同学匹配一位对象，并给出契合度与简短原因。我们只提供联系方式，约会方式由你自己决定。</p>
+                    <h3 class="font-bold text-slate-800 text-md mt-4">谁可以用</h3>
+                    <p>仅限天津高校校园邮箱 @tju.edu.cn 注册，确保参与者均为本校学生。</p>
+                    <h3 class="font-bold text-slate-800 text-md mt-4">联系我们</h3>
+                    <p>反馈与建议可通过「公告与反馈」或邮件联系。本产品为校园项目，数据仅用于匹配与产品改进，详见隐私页。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. 隐私板块 -->
+        <section id="view-privacy" class="hidden max-w-3xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-6">
+                <h2 class="font-bold text-2xl text-slate-800 border-b pb-3">隐私说明</h2>
+                <p class="text-xs text-slate-400">最后更新：2026年3月</p>
+                <div class="space-y-4 text-sm text-slate-600 leading-relaxed">
+                    <h3 class="font-bold text-slate-800">收集的信息</h3>
+                    <p>我们收集你注册时使用的校园邮箱 (@tju.edu.cn)、问卷中填写的信息（昵称、性别、年级、学院、核心价值观、偏好等），用于账号识别与匹配算法。</p>
+                    <h3 class="font-bold text-slate-800">信息的使用</h3>
+                    <p>你的邮箱仅用于登录与向匹配对象展示（在配对揭晓时）。问卷内容用于计算契合度与生成匹配理由，不会对外公开或用于其他商业目的。</p>
+                    <h3 class="font-bold text-slate-800">数据存储</h3>
+                    <p>你的数据加密存储在服务器数据库中，仅用于匹配算法计算。我们不会将数据分享给第三方或用于其他目的。</p>
+                    <h3 class="font-bold text-slate-800">退出与删除</h3>
+                    <p>你可以在产品内退出登录。若你希望删除账号及所有关联数据，可通过反馈功能或邮件联系我们处理。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. 超级管理后台 (全面优化) -->
         <section id="view-admin" class="hidden max-w-6xl mx-auto p-6 space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-borderClr space-y-6">
                 <div class="flex justify-between items-center border-b pb-4">
                     <div>
-                        <h2 class="font-bold text-xl text-primary">后台管理</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">审核学生档案、管理账号、分页控制与匹配开关</p>
+                        <h2 class="font-bold text-xl text-primary">管理后台指挥中心</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">用户档案审核、配对状态开关、管理员权限管理与公告/反馈处理</p>
                     </div>
-                    <span class="text-xs bg-blue-100 text-primary px-3 py-1 rounded-full font-bold">超级管理员</span>
+                    <span class="text-xs bg-rose-100 text-primary px-3 py-1 rounded-full font-bold">Root Admin</span>
                 </div>
-                <div>
-                    <h3 class="font-bold text-md text-slate-800 mb-3">注册用户与学生身份分页管理列表</h3>
+
+                <!-- 后台多 Tab 管理 -->
+                <div class="flex space-x-2 border-b pb-3 text-xs font-semibold">
+                    <button onclick="switchAdminTab('users')" id="atab-users" class="px-4 py-2 bg-primary text-white rounded-xl">用户与配对管理</button>
+                    <button onclick="switchAdminTab('admins')" id="atab-admins" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl">管理员权限管理</button>
+                    <button onclick="switchAdminTab('contents')" id="atab-contents" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl">公告与反馈处理</button>
+                </div>
+
+                <!-- Tab 1: 用户管理 -->
+                <div id="admin-panel-users" class="space-y-4">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-100 text-slate-700 uppercase">
                                 <tr>
                                     <th class="p-3">邮箱 / 账号</th>
                                     <th class="p-3">高校</th>
-                                    <th class="p-3">审核说明</th>
-                                    <th class="p-3">证明材料</th>
-                                    <th class="p-3">状态</th>
-                                    <th class="p-3">匹配状态</th>
+                                    <th class="p-3">认证状态</th>
+                                    <th class="p-3">参与配对状态</th>
                                     <th class="p-3 text-right">管理操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-user-table" class="divide-y divide-slate-200">
-                                <!-- 动态加载 -->
-                            </tbody>
+                            <tbody id="admin-user-table" class="divide-y divide-slate-200"></tbody>
                         </table>
                     </div>
-                    <div class="flex justify-between items-center mt-4 pt-4 border-t text-xs text-slate-600">
-                        <span id="pagination-info">显示第 1 页，共 1 页</span>
-                        <div class="space-x-2">
-                            <button onclick="changePage(-1)" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg">上一页</button>
-                            <button onclick="changePage(1)" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg">下一页</button>
+                </div>
+
+                <!-- Tab 2: 管理员管理 (仅源代码中 Admin 可用) -->
+                <div id="admin-panel-admins" class="space-y-4 hidden">
+                    <div class="p-4 bg-slate-50 rounded-2xl space-y-3">
+                        <h3 class="font-bold text-sm text-slate-800">增设新管理员账号</h3>
+                        <div class="flex space-x-2">
+                            <input type="email" id="new-admin-email" placeholder="输入管理员邮箱" class="flex-1 px-3 py-2 text-xs border rounded-xl">
+                            <button onclick="createAdminAccount()" class="bg-primary text-white px-4 py-2 text-xs rounded-xl font-semibold">确认增设</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-700 uppercase">
+                                <tr>
+                                    <th class="p-3">管理员邮箱</th>
+                                    <th class="p-3">角色权限</th>
+                                    <th class="p-3 text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-list-table" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 3: 公告与反馈处理 -->
+                <div id="admin-panel-contents" class="space-y-6 hidden">
+                    <div class="p-4 bg-slate-50 rounded-2xl space-y-3">
+                        <h3 class="font-bold text-sm text-slate-800">发布新公告</h3>
+                        <input type="text" id="ann-title" placeholder="公告标题" class="w-full px-3 py-2 text-xs border rounded-xl">
+                        <textarea id="ann-content" placeholder="公告内容..." class="w-full px-3 py-2 text-xs border rounded-xl"></textarea>
+                        <button onclick="publishAnnouncement()" class="bg-primary text-white px-4 py-2 text-xs rounded-xl font-semibold">发布公告</button>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-800 mb-3">用户反馈单（查看用户邮箱与诉求并回复）</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-100 text-slate-700 uppercase">
+                                    <tr>
+                                        <th class="p-3">用户邮箱</th>
+                                        <th class="p-3">反馈类型</th>
+                                        <th class="p-3">诉求内容</th>
+                                        <th class="p-3">回复状态</th>
+                                        <th class="p-3 text-right">回复操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-feedback-table" class="divide-y divide-slate-200"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+
             </div>
         </section>
 
     </main>
 
     <footer class="text-center py-6 text-xs text-slate-400 border-t border-borderClr bg-white/50">
-        Copyright © 2026 TJSd's team. All Rights Reserved.
+        © 2026 TJU Date · 仅限天津大学 @tju.edu.cn
     </footer>
 
-    <!-- 前端核心脚本 -->
+    <!-- 前端核心控制脚本 -->
     <script>
         const supabaseUrl = 'https://owyidjofutkihavyuhki.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93eWlkam9mdXRraWhhdnl1aGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNTAxMDgsImV4cCI6MjEwNDgyNjEwOH0.1Wt1e8f1mKNJYMhKvZ-yI-u6eioQHyD8BCJvCWDb2R8';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         let currentUser = null;
-        let adminCurrentPage = 1;
-        const adminPageSize = 5;
+        let currentQTab = 1;
 
         window.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('tjsd_current_user');
@@ -285,62 +518,63 @@
                 currentUser = JSON.parse(savedUser);
                 showMainApp();
             } else {
-                showAuthView();
+                showCoverView();
             }
         });
 
-        function showAuthView() {
-            document.getElementById('view-auth').classList.remove('hidden');
+        function showCoverView() {
+            document.getElementById('view-cover').classList.remove('hidden');
             document.getElementById('navbar').classList.add('hidden');
             hideAllTabs();
         }
 
+        function navigateHome() {
+            if (!currentUser) showCoverView();
+            else switchTab('home');
+        }
+
         function showMainApp() {
-            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('view-cover').classList.add('hidden');
+            document.getElementById('auth-modal-container').classList.add('hidden');
             document.getElementById('navbar').classList.remove('hidden');
             document.getElementById('user-display-name').innerText = currentUser.nickname || currentUser.email;
-            
-            const isAdmin = currentUser.email === 'Admin' || currentUser.email === 'xyhh99@qq.com';
+
+            const isAdmin = currentUser.email === 'Admin' || currentUser.email === 'xyhh99@qq.com' || currentUser.role === 'admin' || currentUser.role === 'super_admin';
             const navContainer = document.getElementById('nav-menu-container');
 
             if (isAdmin) {
                 document.getElementById('system-mode-tag').innerText = '管理后台指挥中心';
                 navContainer.innerHTML = `
                     <button onclick="switchTab('admin')" id="nav-admin" class="text-primary font-semibold">管理后台</button>
+                    <button onclick="switchTab('announcements')" id="nav-announcements" class="text-slate-600 hover:text-primary">公告与反馈</button>
+                    <button onclick="switchTab('about')" id="nav-about" class="text-slate-600 hover:text-primary">关于</button>
+                    <button onclick="switchTab('privacy')" id="nav-privacy" class="text-slate-600 hover:text-primary">隐私</button>
                 `;
                 switchTab('admin');
             } else {
                 document.getElementById('system-mode-tag').innerText = '学生端系统';
                 navContainer.innerHTML = `
-                    <button onclick="switchTab('home')" id="nav-home" class="text-primary font-semibold hover:text-primary">首页概览</button>
-                    <button onclick="switchTab('questionnaire')" id="nav-questionnaire" class="text-gray-600 hover:text-primary">个人问卷</button>
-                    <button onclick="switchTab('reveal')" id="nav-reveal" class="text-gray-600 hover:text-primary">匹配揭晓</button>
-                    <button onclick="switchTab('verify')" id="nav-verify" class="text-gray-600 hover:text-primary">认证状态</button>
+                    <button onclick="switchTab('home')" id="nav-home" class="text-primary font-semibold">首页概览</button>
+                    <button onclick="switchTab('questionnaire')" id="nav-questionnaire" class="text-slate-600 hover:text-primary">个人问卷</button>
+                    <button onclick="switchTab('reveal')" id="nav-reveal" class="text-slate-600 hover:text-primary">匹配揭晓</button>
+                    <button onclick="switchTab('announcements')" id="nav-announcements" class="text-slate-600 hover:text-primary">公告与反馈</button>
+                    <button onclick="switchTab('about')" id="nav-about" class="text-slate-600 hover:text-primary">关于</button>
+                    <button onclick="switchTab('privacy')" id="nav-privacy" class="text-slate-600 hover:text-primary">隐私</button>
                 `;
                 switchTab('home');
             }
         }
 
         function hideAllTabs() {
-            ['view-home', 'view-questionnaire', 'view-reveal', 'view-verify', 'view-admin'].forEach(id => {
+            ['view-home', 'view-questionnaire', 'view-reveal', 'view-announcements', 'view-about', 'view-privacy', 'view-admin'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.classList.add('hidden');
             });
         }
 
         function switchTab(tabName) {
-            const isAdmin = currentUser && (currentUser.email === 'Admin' || currentUser.email === 'xyhh99@qq.com');
-            if (isAdmin && tabName !== 'admin') {
-                alert('管理员账号无法访问学生端页面！');
-                return;
-            }
-            if (!isAdmin && tabName === 'admin') {
-                alert('学生账号无权访问管理后台！');
-                return;
-            }
-
             hideAllTabs();
-            ['home', 'questionnaire', 'reveal', 'verify', 'admin'].forEach(t => {
+            ['home', 'questionnaire', 'reveal', 'announcements', 'about', 'privacy', 'admin'].forEach(t => {
                 const btn = document.getElementById(`nav-${t}`);
                 if(btn) btn.className = t === tabName ? "text-primary font-semibold" : "text-slate-600 hover:text-primary";
             });
@@ -348,63 +582,45 @@
             if (tabName === 'home') document.getElementById('view-home').classList.remove('hidden');
             else if (tabName === 'questionnaire') { document.getElementById('view-questionnaire').classList.remove('hidden'); loadQuestionnaireData(); }
             else if (tabName === 'reveal') document.getElementById('view-reveal').classList.remove('hidden');
-            else if (tabName === 'verify') { document.getElementById('view-verify').classList.remove('hidden'); loadVerifyData(); }
+            else if (tabName === 'announcements') { document.getElementById('view-announcements').classList.remove('hidden'); loadAnnouncements(); }
+            else if (tabName === 'about') document.getElementById('view-about').classList.remove('hidden');
+            else if (tabName === 'privacy') document.getElementById('view-privacy').classList.remove('hidden');
             else if (tabName === 'admin') { document.getElementById('view-admin').classList.remove('hidden'); loadAdminData(); }
         }
 
-        function switchAuthMode(mode) {
+        function showAuthMode(mode) {
+            document.getElementById('auth-modal-container').classList.remove('hidden');
             ['login', 'register', 'forgot'].forEach(m => {
-                document.getElementById(`form-${m}`).classList.add('hidden');
-                document.getElementById(`tab-${m}`).className = "flex-1 pb-2 text-center text-slate-400 border-b-2 border-transparent";
+                const f = document.getElementById(`form-${m}`);
+                const t = document.getElementById(`tab-${m}`);
+                if(f) f.classList.add('hidden');
+                if(t) t.className = "flex-1 pb-2 text-center text-slate-400 border-b-2 border-transparent";
             });
-            document.getElementById(`form-${mode}`).classList.remove('hidden');
-            document.getElementById(`tab-${mode}`).className = "flex-1 pb-2 text-center border-b-2 border-primary text-primary font-semibold";
+            const targetF = document.getElementById(`form-${mode}`);
+            const targetT = document.getElementById(`tab-${mode}`);
+            if(targetF) targetF.classList.remove('hidden');
+            if(targetT) targetT.className = "flex-1 pb-2 text-center border-b-2 border-primary text-primary font-semibold";
         }
 
-        // 发送真实 6 位数字验证码（完全基于 Supabase Auth 发信通道）
+        function closeAuthModal() {
+            document.getElementById('auth-modal-container').classList.add('hidden');
+        }
+
+        // 验证码与认证
         async function sendRealEmailCode() {
             const email = document.getElementById('reg-email').value.trim();
-            if (!email) { alert('请先输入电子邮箱'); return; }
-            
-            const btn = document.getElementById('btn-send-code');
-            btn.innerText = '发送中...';
-            btn.disabled = true;
-
-            try {
-                const { error } = await _supabase.auth.signInWithOtp({ 
-                    email,
-                    options: { shouldCreateUser: true }
-                });
-                if (error) {
-                    alert('邮件发送失败: ' + error.message + '\n请检查 Supabase 后台 SMTP 配置。');
-                } else {
-                    alert(`[津缘邮件系统] 6位数字验证码已成功发送至 ${email}，请查收邮件。`);
-                }
-            } catch (err) {
-                alert('发送异常: ' + err.message);
-            } finally {
-                btn.innerText = '发送验证码';
-                btn.disabled = false;
-            }
+            if (!email) { alert('请输入邮箱'); return; }
+            const { error } = await _supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+            if (error) alert('发送失败: ' + error.message);
+            else alert(`6位验证码已发送至 ${email}`);
         }
 
         async function sendForgotCode() {
             const email = document.getElementById('forgot-email').value.trim();
-            if (!email) { alert('请先输入账号邮箱'); return; }
+            if (!email) { alert('请输入邮箱'); return; }
             const { error } = await _supabase.auth.signInWithOtp({ email });
-            if (error) alert('重置邮件发送失败: ' + error.message);
-            else alert(`[密码重置] 验证码已发送至 ${email}`);
-        }
-
-        async function uploadStudentCard(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const fileName = `card_${Date.now()}_${file.name}`;
-            const { data, error } = await _supabase.storage.from('tjsd-uploads').upload(fileName, file);
-            if (error) { alert('文件上传失败: ' + error.message); return; }
-            const { data: pubData } = _supabase.storage.from('tjsd-uploads').getPublicUrl(fileName);
-            document.getElementById('reg-card-url').value = pubData.publicUrl;
-            document.getElementById('upload-status').innerText = '✔ 证明材料上传成功！';
+            if (error) alert('发送失败: ' + error.message);
+            else alert(`重置验证码已发送至 ${email}`);
         }
 
         async function handleRegister(event) {
@@ -413,40 +629,19 @@
             const code = document.getElementById('reg-code').value.trim();
             const password = document.getElementById('reg-password').value;
             const school = document.getElementById('reg-school').value;
-            const proof_image_url = document.getElementById('reg-card-url').value;
 
-            // 1. 校验邮箱验证码
-            const { data: authData, error: authError } = await _supabase.auth.verifyOtp({
-                email,
-                token: code,
-                type: 'email'
-            });
+            const { error: authError } = await _supabase.auth.verifyOtp({ email, token: code, type: 'email' });
+            if (authError) { alert('验证码错误: ' + authError.message); return; }
 
-            if (authError) {
-                alert('验证码错误或已失效: ' + authError.message);
-                return;
-            }
+            await _supabase.auth.updateUser({ password });
 
-            // 2. 为该用户在 Supabase Auth 中设置密码
-            const { error: pwdError } = await _supabase.auth.updateUser({ password });
-            if (pwdError) {
-                console.warn('密码更新提示: ', pwdError.message);
-            }
-
-            // 3. 写入 tj_users 表
             const { data, error } = await _supabase.from('tj_users').insert([{
-                email, 
-                school, 
-                proof_image_url, 
-                nickname: email.split('@')[0], 
-                verify_status: 'pending',
-                is_verified: false
+                email, school, nickname: email.split('@')[0], verify_status: 'pending', is_verified: false
             }]).select();
 
-            if (error) {
-                alert('注册档案写入失败: ' + error.message);
-            } else {
-                alert('注册成功！请等待管理员审核。');
+            if (error) alert('注册失败: ' + error.message);
+            else {
+                alert('注册成功，等待审核！');
                 currentUser = data[0];
                 localStorage.setItem('tjsd_current_user', JSON.stringify(currentUser));
                 showMainApp();
@@ -459,28 +654,21 @@
             const password = document.getElementById('login-password').value;
 
             if ((inputEmail === 'Admin' || inputEmail === 'xyhh99@qq.com') && password === 'TJSd@260913') {
-                currentUser = { id: 'admin_root_id', email: 'xyhh99@qq.com', nickname: '超级管理员', verify_status: 'approved' };
+                currentUser = { id: 'admin_root_id', email: 'xyhh99@qq.com', nickname: '超级管理员', role: 'super_admin' };
                 localStorage.setItem('tjsd_current_user', JSON.stringify(currentUser));
                 showMainApp();
                 return;
             }
 
-            const { data: authData, error: authError } = await _supabase.auth.signInWithPassword({
-                email: inputEmail,
-                password: password
-            });
+            const { error: authError } = await _supabase.auth.signInWithPassword({ email: inputEmail, password });
+            if (authError) { alert('登录失败：账号或密码错误。'); return; }
 
-            if (authError) {
-                alert('登录失败：账号或密码错误。');
-                return;
-            }
-
-            const { data, error } = await _supabase.from('tj_users').select('*').eq('email', inputEmail).limit(1);
-            if (error || !data || data.length === 0) {
+            const { data } = await _supabase.from('tj_users').select('*').eq('email', inputEmail).limit(1);
+            if (data && data.length > 0) {
+                currentUser = data[0];
+            } else {
                 const { data: newData } = await _supabase.from('tj_users').insert([{ email: inputEmail, nickname: inputEmail.split('@')[0] }]).select();
                 currentUser = newData[0];
-            } else {
-                currentUser = data[0];
             }
 
             localStorage.setItem('tjsd_current_user', JSON.stringify(currentUser));
@@ -497,15 +685,29 @@
             if (vError) { alert('验证码错误: ' + vError.message); return; }
 
             const { error } = await _supabase.auth.updateUser({ password: newPassword });
-            if (error) alert('密码重置失败: ' + error.message); 
-            else { alert('密码重置成功，请重新登录'); switchAuthMode('login'); }
+            if (error) alert('重置失败: ' + error.message);
+            else { alert('密码重置成功，请登录'); showAuthMode('login'); }
         }
 
         function logout() {
             localStorage.removeItem('tjsd_current_user');
             currentUser = null;
-            showAuthView();
+            showCoverView();
         }
+
+        // 问卷标签切换与保存
+        function switchQTab(tabIndex) {
+            currentQTab = tabIndex;
+            for (let i = 1; i <= 5; i++) {
+                const content = document.getElementById(`qtab-content-${i}`);
+                const btn = document.getElementById(`qtab-btn-${i}`);
+                if (content) content.classList.toggle('hidden', i !== tabIndex);
+                if (btn) btn.className = i === tabIndex ? "px-4 py-2 rounded-xl bg-primary text-white shadow" : "px-4 py-2 rounded-xl bg-slate-100 text-slate-700";
+            }
+        }
+
+        function nextQTab() { if (currentQTab < 5) switchQTab(currentQTab + 1); }
+        function prevQTab() { if (currentQTab > 1) switchQTab(currentQTab - 1); }
 
         async function loadQuestionnaireData() {
             const { data } = await _supabase.from('tj_questionnaires').select('*').eq('user_id', currentUser.id).limit(1);
@@ -514,6 +716,9 @@
                 document.getElementById('q-real_name').value = q.real_name || '';
                 document.getElementById('q-nickname').value = q.nickname || '';
                 document.getElementById('q-height').value = q.height || '';
+                document.getElementById('q-weight').value = q.weight || '';
+                document.getElementById('q-grade').value = q.grade || '';
+                document.getElementById('q-hometown').value = q.hometown || '';
                 document.getElementById('q-contact_info').value = q.contact_info || '';
                 document.getElementById('q-bio').value = q.bio || '';
             }
@@ -526,6 +731,9 @@
                 real_name: document.getElementById('q-real_name').value,
                 nickname: document.getElementById('q-nickname').value,
                 height: parseInt(document.getElementById('q-height').value) || 0,
+                weight: parseInt(document.getElementById('q-weight').value) || 0,
+                grade: document.getElementById('q-grade').value,
+                hometown: document.getElementById('q-hometown').value,
                 contact_info: document.getElementById('q-contact_info').value,
                 bio: document.getElementById('q-bio').value,
                 updated_at: new Date()
@@ -533,46 +741,74 @@
             const { error } = await _supabase.from('tj_questionnaires').upsert(payload, { onConflict: 'user_id' });
             if (error) alert('保存失败: ' + error.message);
             else {
-                document.getElementById('questionnaire-save-tip').innerText = '✔ 问卷与档案已同步至云端！';
+                document.getElementById('questionnaire-save-tip').innerText = '✔ 档案与问卷已成功同步云端！';
                 setTimeout(() => document.getElementById('questionnaire-save-tip').innerText = '', 3000);
             }
         }
 
-        async function loadVerifyData() {
-            const { data } = await _supabase.from('tj_users').select('*').eq('id', currentUser.id).limit(1);
+        // 公告与反馈
+        async function loadAnnouncements() {
+            const { data } = await _supabase.from('tj_announcements').select('*').order('created_at', { ascending: false });
+            const list = document.getElementById('announcement-list');
+            list.innerHTML = '';
             if (data && data.length > 0) {
-                const u = data[0];
-                document.getElementById('verify-email').innerText = u.email;
-                const badge = document.getElementById('verify-status-badge');
-                badge.innerText = u.verify_status === 'approved' ? '已通过认证' : (u.verify_status === 'rejected' ? '已驳回' : '审核中');
+                data.forEach(ann => {
+                    list.innerHTML += `
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+                            <h4 class="font-bold text-sm text-slate-800">${ann.title}</h4>
+                            <p class="text-xs text-slate-600">${ann.content}</p>
+                            <span class="text-[10px] text-slate-400 block pt-1">${new Date(ann.created_at).toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                list.innerHTML = `<div class="text-xs text-slate-400">暂无系统公告</div>`;
             }
         }
 
+        async function submitFeedback(event) {
+            event.preventDefault();
+            const feedback_type = document.querySelector('input[name="fb-type"]:checked').value;
+            const content = document.getElementById('fb-content').value.trim();
+            const { error } = await _supabase.from('tj_feedbacks').insert([{
+                user_email: currentUser.email,
+                feedback_type,
+                content
+            }]);
+            if (error) alert('提交失败: ' + error.message);
+            else { alert('反馈已提交成功，管理员将尽快处理！'); document.getElementById('fb-content').value = ''; }
+        }
+
+        // 管理员后台与功能
+        function switchAdminTab(tab) {
+            ['users', 'admins', 'contents'].forEach(t => {
+                document.getElementById(`admin-panel-${t}`).classList.toggle('hidden', t !== tab);
+                document.getElementById(`atab-${t}`).className = t === tab ? "px-4 py-2 bg-primary text-white rounded-xl" : "px-4 py-2 bg-slate-100 text-slate-700 rounded-xl";
+            });
+            if (tab === 'users') loadAdminUsers();
+            else if (tab === 'admins') loadAdminList();
+            else if (tab === 'contents') loadAdminFeedbacks();
+        }
+
         async function loadAdminData() {
+            switchAdminTab('users');
+        }
+
+        async function loadAdminUsers() {
             const { data } = await _supabase.from('tj_users').select('*').order('created_at', { ascending: false });
             const tbody = document.getElementById('admin-user-table');
             tbody.innerHTML = '';
             if (data) {
-                const totalPages = Math.ceil(data.length / adminPageSize) || 1;
-                if (adminCurrentPage > totalPages) adminCurrentPage = totalPages;
-                const startIndex = (adminCurrentPage - 1) * adminPageSize;
-                const paginatedData = data.slice(startIndex, startIndex + adminPageSize);
-
-                document.getElementById('pagination-info').innerText = `显示第 ${adminCurrentPage} 页，共 ${totalPages} 页（总计 ${data.length} 个账号）`;
-
-                paginatedData.forEach(u => {
+                data.forEach(u => {
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50">
                             <td class="p-3 font-medium">${u.email}</td>
                             <td class="p-3">${u.school || '-'}</td>
-                            <td class="p-3 text-slate-500">${u.remark || '无'}</td>
-                            <td class="p-3">${u.proof_image_url ? `<a href="${u.proof_image_url}" target="_blank" class="text-primary underline">查看证明</a>` : '无'}</td>
                             <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${u.verify_status==='approved'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">${u.verify_status}</span></td>
-                            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-medium ${u.allow_matching!==false?'bg-blue-100 text-blue-800':'bg-slate-100 text-slate-600'}">${u.allow_matching!==false?'已参与匹配':'已取消匹配'}</span></td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-medium ${u.allow_matching!==false?'bg-blue-100 text-blue-800':'bg-slate-100 text-slate-600'}">${u.allow_matching!==false?'参与配对中':'已取消'}</span></td>
                             <td class="p-3 text-right space-x-1">
                                 <button onclick="updateUserStatus('${u.id}', 'approved')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[11px]">通过</button>
-                                <button onclick="updateUserStatus('${u.id}', 'rejected')" class="bg-amber-600 text-white px-2 py-1 rounded text-[11px]">驳回</button>
-                                <button onclick="toggleUserMatch('${u.id}', ${u.allow_matching!==false})" class="bg-blue-600 text-white px-2 py-1 rounded text-[11px]">${u.allow_matching!==false?'取消匹配':'恢复匹配'}</button>
+                                <button onclick="toggleUserMatch('${u.id}', ${u.allow_matching!==false})" class="bg-blue-600 text-white px-2 py-1 rounded text-[11px]">配对开关</button>
                                 <button onclick="deleteUserAccount('${u.id}')" class="bg-rose-600 text-white px-2 py-1 rounded text-[11px]">删除</button>
                             </td>
                         </tr>
@@ -581,31 +817,92 @@
             }
         }
 
-        function changePage(direction) {
-            adminCurrentPage += direction;
-            if (adminCurrentPage < 1) adminCurrentPage = 1;
-            loadAdminData();
-        }
-
         async function updateUserStatus(userId, status) {
-            const { error } = await _supabase.from('tj_users').update({ verify_status: status, is_verified: status === 'approved' }).eq('id', userId);
-            if (error) alert('操作失败'); else { alert('审核状态已更新'); loadAdminData(); }
+            await _supabase.from('tj_users').update({ verify_status: status, is_verified: status === 'approved' }).eq('id', userId);
+            alert('状态已更新'); loadAdminUsers();
         }
 
         async function toggleUserMatch(userId, currentStatus) {
-            const newStatus = !currentStatus;
-            const { error } = await _supabase.from('tj_questionnaires').update({ allow_matching: newStatus }).eq('user_id', userId);
-            if (error) alert('操作失败'); else { alert(`用户匹配状态已更改`); loadAdminData(); }
+            await _supabase.from('tj_questionnaires').update({ allow_matching: !currentStatus }).eq('user_id', userId);
+            alert('配对权限已切换'); loadAdminUsers();
         }
 
         async function deleteUserAccount(userId) {
-            if (!confirm('确定要彻底删除该注册账号及其关联档案吗？')) return;
-            const { error } = await _supabase.from('tj_users').delete().eq('id', userId);
-            if (error) alert('删除失败'); else { alert('账号已成功删除'); loadAdminData(); }
+            if (!confirm('确定删除此账号？')) return;
+            await _supabase.from('tj_users').delete().eq('id', userId);
+            alert('已删除'); loadAdminUsers();
+        }
+
+        async function loadAdminList() {
+            const { data } = await _supabase.from('tj_users').select('*').in('role', ['admin', 'super_admin']);
+            const tbody = document.getElementById('admin-list-table');
+            tbody.innerHTML = '';
+            if (data) {
+                data.forEach(a => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3 font-medium">${a.email}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold">${a.role}</span></td>
+                            <td class="p-3 text-right">
+                                <button onclick="resetAdminPassword('${a.email}')" class="bg-amber-600 text-white px-2 py-1 rounded text-[11px]">重设密码</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        async function createAdminAccount() {
+            const email = document.getElementById('new-admin-email').value.trim();
+            if (!email) { alert('请输入邮箱'); return; }
+            const { error } = await _supabase.from('tj_users').update({ role: 'admin' }).eq('email', email);
+            if (error) alert('操作失败'); else { alert('已成功赋予管理员权限！'); loadAdminList(); }
+        }
+
+        async function resetAdminPassword(email) {
+            const { error } = await _supabase.auth.resetPasswordForEmail(email);
+            if (error) alert('发送重置邮件失败: ' + error.message);
+            else alert(`密码重置邮件已发送至 ${email}`);
+        }
+
+        async function publishAnnouncement() {
+            const title = document.getElementById('ann-title').value.trim();
+            const content = document.getElementById('ann-content').value.trim();
+            if (!title || !content) { alert('请填写完整'); return; }
+            const { error } = await _supabase.from('tj_announcements').insert([{ title, content }]);
+            if (error) alert('发布失败'); else { alert('公告发布成功！'); loadAnnouncements(); document.getElementById('ann-title').value=''; document.getElementById('ann-content').value=''; }
+        }
+
+        async function loadAdminFeedbacks() {
+            const { data } = await _supabase.from('tj_feedbacks').select('*').order('created_at', { ascending: false });
+            const tbody = document.getElementById('admin-feedback-table');
+            tbody.innerHTML = '';
+            if (data) {
+                data.forEach(f => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3 font-semibold text-primary">${f.user_email}</td>
+                            <td class="p-3">${f.feedback_type}</td>
+                            <td class="p-3 max-w-xs truncate">${f.content}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs ${f.status==='已回复'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">${f.status}</span></td>
+                            <td class="p-3 text-right">
+                                <button onclick="replyFeedback('${f.id}')" class="bg-primary text-white px-2 py-1 rounded text-[11px]">回复诉求</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        async function replyFeedback(id) {
+            const reply = prompt('请输入对该用户诉求的回复内容：');
+            if (!reply) return;
+            const { error } = await _supabase.from('tj_feedbacks').update({ reply, status: '已回复' }).eq('id', id);
+            if (error) alert('回复失败'); else { alert('回复成功！'); loadAdminFeedbacks(); }
         }
 
         function toggleParticipation() {
-            alert('已成功更新本周匹配参与状态！');
+            alert('本周匹配参与状态已成功切换！');
         }
     </script>
 </body>
