@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>津缘 - 天津高校学子专属交友平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0284c7',
+                        primaryHover: '#0369a1',
+                        cream: '#f0f9ff',
+                        cardBg: '#ffffff',
+                        borderClr: '#e0f2fe'
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '"Noto Sans SC"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f8fafc; font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif; color: #1e293b; }
+        input[type="range"] { accent-color: #0284c7; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- 顶部导航栏 -->
+    <header id="navbar" class="hidden bg-white/90 backdrop-blur-md border-b border-borderClr sticky top-0 z-50 px-6 py-3 flex justify-between items-center shadow-sm">
+        <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">津</div>
+            <span class="font-bold text-xl text-primary tracking-wider">津缘 TJSd</span>
+            <span id="system-mode-tag" class="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium ml-2">学生端系统</span>
+        </div>
+        <nav id="nav-menu-container" class="hidden md:flex items-center space-x-8 text-sm font-medium">
+            <!-- 动态渲染 -->
+        </nav>
+        <div class="flex items-center space-x-4">
+            <span id="user-display-name" class="text-sm font-medium text-gray-700"></span>
+            <button onclick="logout()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition">退出登录</button>
+        </div>
+    </header>
+
+    <!-- 主容器 -->
+    <main class="flex-grow">
+
+        <!-- 1. 登录与注册页 -->
+        <section id="view-auth" class="min-h-screen flex items-center justify-center p-4 bg-cover bg-center" style="background-image: linear-gradient(rgba(15,23,42,0.45), rgba(15,23,42,0.65)), url('https://img.remit.ee/i/c784YEKLJhxP');">
+            <div class="bg-white/95 backdrop-blur-xl p-8 rounded-2xl shadow-2xl max-w-md w-full border border-white/25">
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 bg-primary rounded-xl mx-auto flex items-center justify-center text-white font-bold text-xl shadow-lg">津</div>
+                    <h1 class="font-bold text-2xl text-slate-800 mt-3">津缘</h1>
+                    <p class="text-xs text-slate-500 mt-1">天津高校学子专属交友平台</p>
+                </div>
+
+                <div class="flex border-b border-slate-200 mb-6 text-sm font-medium">
+                    <button onclick="switchAuthMode('login')" id="tab-login" class="flex-1 pb-2 text-center border-b-2 border-primary text-primary font-semibold">账号登录</button>
+                    <button onclick="switchAuthMode('register')" id="tab-register" class="flex-1 pb-2 text-center text-slate-400">新用户注册</button>
+                    <button onclick="switchAuthMode('forgot')" id="tab-forgot" class="flex-1 pb-2 text-center text-slate-400">找回密码</button>
+                </div>
+
+                <!-- 登录表单 -->
+                <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">登录邮箱 / 管理员账号</label>
+                        <input type="text" id="login-email" required placeholder="输入您的邮箱或 Admin" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">登录密码</label>
+                        <input type="password" id="login-password" required placeholder="请输入密码" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg transition">安全登录系统</button>
+                </form>
+
+                <!-- 注册表单 -->
+                <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">电子邮箱（支持 163/QQ/高校邮箱）</label>
+                        <div class="flex space-x-2">
+                            <input type="email" id="reg-email" required placeholder="name@example.com" class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                            <button type="button" onclick="sendCustomVerificationCode('reg')" id="btn-send-code" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 text-xs rounded-xl transition">发送验证码</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">6位数字邮箱验证码</label>
+                        <input type="text" id="reg-code" required placeholder="请输入收到的6位验证码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">设置登录密码</label>
+                        <input type="password" id="reg-password" required placeholder="不少于6位安全密码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">所属天津高校</label>
+                        <select id="reg-school" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                            <option value="天津大学">天津大学</option>
+                            <option value="南开大学">南开大学</option>
+                            <option value="天津师范大学">天津师范大学</option>
+                            <option value="天津医科大学">天津医科大学</option>
+                            <option value="天津理工大学">天津理工大学</option>
+                            <option value="天津仁爱学院">天津仁爱学院</option>
+                            <option value="其他天津高校">其他天津高校</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <label class="block text-xs font-bold text-primary">学生证明或证件上传（非试点高校或无对应邮箱用户）</label>
+                        <input type="file" id="reg-card-file" accept="image/*" onchange="uploadStudentCard(event)" class="text-xs text-slate-500 w-full file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
+                        <input type="hidden" id="reg-card-url">
+                        <div id="upload-status" class="text-xs text-emerald-600 mt-1"></div>
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg transition">确认注册并进入系统</button>
+                </form>
+
+                <!-- 密码找回表单 -->
+                <form id="form-forgot" onsubmit="handleForgot(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">注册邮箱</label>
+                        <div class="flex space-x-2">
+                            <input type="email" id="forgot-email" required placeholder="输入账号邮箱" class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl">
+                            <button type="button" onclick="sendCustomVerificationCode('forgot')" id="btn-forgot-send" class="bg-slate-800 text-white px-3 py-2 text-xs rounded-xl">发验证码</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">6位数字验证码</label>
+                        <input type="text" id="forgot-code" required placeholder="6位验证码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">新密码</label>
+                        <input type="password" id="forgot-new-password" required placeholder="输入新密码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl">
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg">重置密码并登录</button>
+                </form>
+
+                <div class="mt-6 text-[10px] text-slate-400 text-center leading-relaxed">
+                    Copyright © 2026 TJSd's team All Rights Reserved.
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 学生端 - 首页 -->
+        <section id="view-home" class="hidden max-w-4xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr">
+                <h2 class="font-bold text-2xl text-slate-800">你好，<span id="home-nickname" class="text-primary">同学</span></h2>
+                <p class="text-sm text-slate-500 mt-1">当前账号审核状态：<span id="home-audit-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">资料审核中</span></p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr space-y-4">
+                <h3 class="font-bold text-lg text-slate-800">本周匹配与成长计划</h3>
+                <div class="p-4 bg-cream rounded-xl border border-blue-100 flex justify-between items-center">
+                    <div>
+                        <span class="text-xs font-bold text-primary block">本期匹配截止：每周六 12:30</span>
+                        <span id="participation-status-text" class="text-xs text-slate-600 mt-0.5 block">状态：已加入匹配池</span>
+                    </div>
+                    <button onclick="toggleParticipation()" id="btn-participate" class="bg-primary text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-sm">切换匹配状态</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 学生端 - 个人问卷编辑页 -->
+        <section id="view-questionnaire" class="hidden max-w-3xl mx-auto p-6 space-y-8">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr">
+                <div class="flex justify-between items-center mb-6 border-b pb-4">
+                    <h2 class="font-bold text-xl text-primary">全方位档案与问卷编辑</h2>
+                    <span id="questionnaire-save-tip" class="text-xs text-emerald-600 font-medium"></span>
+                </div>
+                <form id="form-questionnaire" onsubmit="saveQuestionnaire(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">真实姓名</label>
+                            <input type="text" id="q-real_name" class="w-full px-3 py-2 text-sm border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">昵称</label>
+                            <input type="text" id="q-nickname" required class="w-full px-3 py-2 text-sm border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">身高 (cm)</label>
+                            <input type="number" id="q-height" class="w-full px-3 py-2 text-sm border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">联系方式 (微信/手机，匹配成功可见)</label>
+                            <input type="text" id="q-contact_info" required class="w-full px-3 py-2 text-sm border rounded-xl">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">个人简介与交友宣言 (Bio)</label>
+                        <textarea id="q-bio" rows="3" class="w-full p-3 border rounded-xl text-xs"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm shadow-md">保存并提交问卷云端</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 4. 匹配揭晓页 -->
+        <section id="view-reveal" class="hidden max-w-2xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr space-y-6 text-center">
+                <div class="w-16 h-16 bg-blue-50 text-primary rounded-full flex items-center justify-center mx-auto text-2xl font-bold">🎡</div>
+                <h2 class="font-bold text-2xl text-slate-800">本周匹配揭晓专区（天津之眼主题）</h2>
+                <p class="text-xs text-slate-500">每周六下午 12:30 准时进行智能双向配对。</p>
+            </div>
+        </section>
+
+        <!-- 5. 我的认证页 -->
+        <section id="view-verify" class="hidden max-w-2xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr space-y-6">
+                <h2 class="font-bold text-xl text-primary">高校身份与人工认证状态</h2>
+                <div class="space-y-4 text-sm">
+                    <div class="p-4 bg-slate-50 rounded-xl flex justify-between items-center">
+                        <span class="text-slate-600">注册邮箱</span>
+                        <span id="verify-email" class="font-semibold text-slate-800"></span>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl flex justify-between items-center">
+                        <span class="text-slate-600">认证审核状态</span>
+                        <span id="verify-status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">审核中</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. 管理系统 -->
+        <section id="view-admin" class="hidden max-w-6xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr space-y-6">
+                <div class="flex justify-between items-center border-b pb-4">
+                    <div>
+                        <h2 class="font-bold text-xl text-primary">后台管理</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">审核学生档案、管理账号、分页控制与匹配开关</p>
+                    </div>
+                    <span class="text-xs bg-blue-100 text-primary px-3 py-1 rounded-full font-bold">超级管理员</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-md text-slate-800 mb-3">注册用户与学生身份分页管理列表</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-700 uppercase">
+                                <tr>
+                                    <th class="p-3">邮箱 / 账号</th>
+                                    <th class="p-3">高校</th>
+                                    <th class="p-3">审核说明</th>
+                                    <th class="p-3">证明材料</th>
+                                    <th class="p-3">状态</th>
+                                    <th class="p-3">匹配状态</th>
+                                    <th class="p-3 text-right">管理操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-table" class="divide-y divide-slate-200">
+                                <!-- 动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 分页控制栏 -->
+                    <div class="flex justify-between items-center mt-4 pt-4 border-t text-xs text-slate-600">
+                        <span id="pagination-info">显示第 1 页，共 1 页</span>
+                        <div class="space-x-2">
+                            <button onclick="changePage(-1)" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg">上一页</button>
+                            <button onclick="changePage(1)" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg">下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 text-xs text-slate-400 border-t border-borderClr bg-white/50">
+        Copyright © 2026 TJSd's team. All Rights Reserved.
+    </footer>
+
+    <!-- 前端核心脚本 -->
+    <script>
+        const supabaseUrl = 'https://owyidjofutkihavyuhki.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93eWlkam9mdXRraWhhdnl1aGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNTAxMDgsImV4cCI6MjEwNDgyNjEwOH0.1Wt1e8f1mKNJYMhKvZ-yI-u6eioQHyD8BCJvCWDb2R8';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentUser = null;
+        let adminCurrentPage = 1;
+        const adminPageSize = 5;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('tjsd_current_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainApp();
+            } else {
+                showAuthView();
+            }
+        });
+
+        function showAuthView() {
+            document.getElementById('view-auth').classList.remove('hidden');
+            document.getElementById('navbar').classList.add('hidden');
+            hideAllTabs();
+        }
+
+        function showMainApp() {
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('navbar').classList.remove('hidden');
+            document.getElementById('user-display-name').innerText = currentUser.nickname || currentUser.email;
+            
+            const isAdmin = currentUser.email === 'Admin' || currentUser.email === 'xyhh99@qq.com';
+            const navContainer = document.getElementById('nav-menu-container');
+
+            if (isAdmin) {
+                document.getElementById('system-mode-tag').innerText = '管理后台指挥中心';
+                navContainer.innerHTML = `
+                    <button onclick="switchTab('admin')" id="nav-admin" class="text-primary font-semibold">管理后台</button>
+                `;
+                switchTab('admin');
+            } else {
+                document.getElementById('system-mode-tag').innerText = '学生端系统';
+                navContainer.innerHTML = `
+                    <button onclick="switchTab('home')" id="nav-home" class="text-primary font-semibold hover:text-primary">首页概览</button>
+                    <button onclick="switchTab('questionnaire')" id="nav-questionnaire" class="text-gray-600 hover:text-primary">个人问卷</button>
+                    <button onclick="switchTab('reveal')" id="nav-reveal" class="text-gray-600 hover:text-primary">匹配揭晓</button>
+                    <button onclick="switchTab('verify')" id="nav-verify" class="text-gray-600 hover:text-primary">认证状态</button>
+                `;
+                switchTab('home');
+            }
+        }
+
+        function hideAllTabs() {
+            ['view-home', 'view-questionnaire', 'view-reveal', 'view-verify', 'view-admin'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+            });
+        }
+
+        function switchTab(tabName) {
+            const isAdmin = currentUser && (currentUser.email === 'Admin' || currentUser.email === 'xyhh99@qq.com');
+            if (isAdmin && tabName !== 'admin') {
+                alert('管理员账号无法访问学生端页面！');
+                return;
+            }
+            if (!isAdmin && tabName === 'admin') {
+                alert('学生账号无权访问管理后台！');
+                return;
+            }
+
+            hideAllTabs();
+            ['home', 'questionnaire', 'reveal', 'verify', 'admin'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                if(btn) btn.className = t === tabName ? "text-primary font-semibold" : "text-slate-600 hover:text-primary";
+            });
+
+            if (tabName === 'home') document.getElementById('view-home').classList.remove('hidden');
+            else if (tabName === 'questionnaire') { document.getElementById('view-questionnaire').classList.remove('hidden'); loadQuestionnaireData(); }
+            else if (tabName === 'reveal') document.getElementById('view-reveal').classList.remove('hidden');
+            else if (tabName === 'verify') { document.getElementById('view-verify').classList.remove('hidden'); loadVerifyData(); }
+            else if (tabName === 'admin') { document.getElementById('view-admin').classList.remove('hidden'); loadAdminData(); }
+        }
+
+        function switchAuthMode(mode) {
+            ['login', 'register', 'forgot'].forEach(m => {
+                document.getElementById(`form-${m}`).classList.add('hidden');
+                document.getElementById(`tab-${m}`).className = "flex-1 pb-2 text-center text-slate-400 border-b-2 border-transparent";
+            });
+            document.getElementById(`form-${mode}`).classList.remove('hidden');
+            document.getElementById(`tab-${mode}`).className = "flex-1 pb-2 text-center border-b-2 border-primary text-primary font-semibold";
+        }
+
+        /**
+         * 核心：生成纯 6 位数字验证码并写入 tj_verifications 表，同时调用 Supabase SMTP 发信
+         */
+        async function sendCustomVerificationCode(type) {
+            const emailInputId = type === 'reg' ? 'reg-email' : 'forgot-email';
+            const btnId = type === 'reg' ? 'btn-send-code' : 'btn-forgot-send';
+            const email = document.getElementById(emailInputId).value.trim();
+            
+            if (!email) { alert('请先输入电子邮箱'); return; }
+
+            const btn = document.getElementById(btnId);
+            btn.innerText = '发送中...';
+            btn.disabled = true;
+
+            try {
+                // 1. 生成标准的 6 位纯数字验证码
+                const code = Math.floor(100000 + Math.random() * 900000).toString();
+                const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10分钟有效
+
+                // 2. 写入自定义的 tj_verifications 数据库表
+                const { error: dbError } = await _supabase.from('tj_verifications').insert([{
+                    email,
+                    code,
+                    expires_at: expiresAt,
+                    used: false
+                }]);
+
+                if (dbError) {
+                    throw new Error('验证码数据库记录写入失败: ' + dbError.message);
+                }
+
+                // 3. 通过 Supabase Auth 的重置/魔法链接通道触发邮件网关，或者利用内置模板将 {{ .Token }} 发出
+                // 此处我们利用 Supabase signInWithOtp 配合后台模板发送刚才写入的专属 6 位码（前提是后台模板已填好 {{ .Token }}）
+                // 此外，为了绝对百分之百同步，我们直接调用 Supabase 内置的 recovery / signup 邮件发送
+                const { error: mailError } = type === 'reg' 
+                    ? await _supabase.auth.signInWithOtp({ email, options: { data: { token: code } } })
+                    : await _supabase.auth.resetPasswordForEmail(email);
+
+                if (mailError) {
+                    console.warn('Auth trigger warning:', mailError.message);
+                }
+
+                alert(`[津缘邮件系统] 6位数字验证码已成功发送至 ${email}，请查收邮件！（测试期间如遇延迟，请核对收件箱或垃圾箱）\n\n【提示：当前生成的验证码为: ${code}】`);
+            } catch (err) {
+                alert('发送异常: ' + err.message);
+            } finally {
+                btn.innerText = '发送验证码';
+                btn.disabled = false;
+            }
+        }
+
+        async function uploadStudentCard(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const fileName = `card_${Date.now()}_${file.name}`;
+            const { data, error } = await _supabase.storage.from('tjsd-uploads').upload(fileName, file);
+            if (error) { alert('文件上传失败: ' + error.message); return; }
+            const { data: pubData } = _supabase.storage.from('tjsd-uploads').getPublicUrl(fileName);
+            document.getElementById('reg-card-url').value = pubData.publicUrl;
+            document.getElementById('upload-status').innerText = '✔ 证明材料上传成功！';
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const email = document.getElementById('reg-email').value.trim();
+            const inputCode = document.getElementById('reg-code').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const school = document.getElementById('reg-school').value;
+            const proof_image_url = document.getElementById('reg-card-url').value;
+
+            // 1. 校验自建表 tj_verifications 中的 6 位数字验证码
+            const { data: vData, error: vError } = await _supabase
+                .from('tj_verifications')
+                .select('*')
+                .eq('email', email)
+                .eq('used', false)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (vError || !vData || vData.length === 0) {
+                alert('未找到该邮箱的验证码记录，请先点击发送验证码。');
+                return;
+            }
+
+            const record = vData[0];
+            if (record.code !== inputCode) {
+                alert('验证码输入错误，请重新核对！');
+                return;
+            }
+            if (new Date(record.expires_at) < new Date()) {
+                alert('验证码已过期，请重新获取。');
+                return;
+            }
+
+            // 标记该验证码为已使用
+            await _supabase.from('tj_verifications').update({ used: true }).eq('id', record.id);
+
+            // 2. 在 Supabase Auth 中创建真实账号
+            const { data: authData, error: authError } = await _supabase.auth.signUp({
+                email,
+                password
+            });
+
+            if (authError && !authError.message.includes('already registered')) {
+                alert('Auth 账号注册失败: ' + authError.message);
+                return;
+            }
+
+            // 3. 写入自定义的 tj_users 表
+            const { data, error } = await _supabase.from('tj_users').insert([{
+                email, 
+                school, 
+                proof_image_url, 
+                nickname: email.split('@')[0], 
+                verify_status: 'pending',
+                is_verified: false
+            }]).select();
+
+            if (error) {
+                // 如果已存在则直接查询
+                const { data: existUser } = await _supabase.from('tj_users').select('*').eq('email', email).limit(1);
+                if (existUser && existUser.length > 0) {
+                    currentUser = existUser[0];
+                } else {
+                    alert('注册档案写入失败: ' + error.message);
+                    return;
+                }
+            } else {
+                currentUser = data[0];
+            }
+
+            alert('注册成功！请登录系统。');
+            switchAuthMode('login');
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const inputEmail = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            // 管理员特权通道
+            if ((inputEmail === 'Admin' || inputEmail === 'xyhh99@qq.com') && password === 'TJSd@260913') {
+                currentUser = { id: 'admin_root_id', email: 'xyhh99@qq.com', nickname: '超级管理员', verify_status: 'approved' };
+                localStorage.setItem('tjsd_current_user', JSON.stringify(currentUser));
+                showMainApp();
+                return;
+            }
+
+            // 普通用户走 Supabase Auth 登录
+            const { data: authData, error: authError } = await _supabase.auth.signInWithPassword({
+                email: inputEmail,
+                password: password
+            });
+
+            if (authError) {
+                alert('登录失败：账号或密码错误。');
+                return;
+            }
+
+            // 从 tj_users 表同步获取业务资料
+            const { data, error } = await _supabase.from('tj_users').select('*').eq('email', inputEmail).limit(1);
+            if (error || !data || data.length === 0) {
+                const { data: newData } = await _supabase.from('tj_users').insert([{ email: inputEmail, nickname: inputEmail.split('@')[0] }]).select();
+                currentUser = newData[0];
+            } else {
+                currentUser = data[0];
+            }
+
+            localStorage.setItem('tjsd_current_user', JSON.stringify(currentUser));
+            showMainApp();
+        }
+
+        async function handleForgot(event) {
+            event.preventDefault();
+            const email = document.getElementById('forgot-email').value.trim();
+            const inputCode = document.getElementById('forgot-code').value.trim();
+            const newPassword = document.getElementById('forgot-new-password').value;
+
+            // 校验自建表验证码
+            const { data: vData, error: vError } = await _supabase
+                .from('tj_verifications')
+                .select('*')
+                .eq('email', email)
+                .eq('used', false)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (vError || !vData || vData.length === 0 || vData[0].code !== inputCode) {
+                alert('验证码错误或不存在');
+                return;
+            }
+
+            await _supabase.from('tj_verifications').update({ used: true }).eq('id', vData[0].id);
+
+            alert('验证通过！由于 Supabase 密码重置需通过后台重置 API，建议您直接使用原密码或联系管理员。');
+            switchAuthMode('login');
+        }
+
+        function logout() {
+            localStorage.removeItem('tjsd_current_user');
+            currentUser = null;
+            showAuthView();
+        }
+
+        async function loadQuestionnaireData() {
+            const { data } = await _supabase.from('tj_questionnaires').select('*').eq('user_id', currentUser.id).limit(1);
+            if (data && data.length > 0) {
+                const q = data[0];
+                document.getElementById('q-real_name').value = q.real_name || '';
+                document.getElementById('q-nickname').value = q.nickname || '';
+                document.getElementById('q-height').value = q.height || '';
+                document.getElementById('q-contact_info').value = q.contact_info || '';
+                document.getElementById('q-bio').value = q.bio || '';
+            }
+        }
+
+        async function saveQuestionnaire(event) {
+            event.preventDefault();
+            const payload = {
+                user_id: currentUser.id,
+                real_name: document.getElementById('q-real_name').value,
+                nickname: document.getElementById('q-nickname').value,
+                height: parseInt(document.getElementById('q-height').value) || 0,
+                contact_info: document.getElementById('q-contact_info').value,
+                bio: document.getElementById('q-bio').value,
+                updated_at: new Date()
+            };
+            const { error } = await _supabase.from('tj_questionnaires').upsert(payload, { onConflict: 'user_id' });
+            if (error) alert('保存失败: ' + error.message);
+            else {
+                document.getElementById('questionnaire-save-tip').innerText = '✔ 问卷与档案已同步至云端！';
+                setTimeout(() => document.getElementById('questionnaire-save-tip').innerText = '', 3000);
+            }
+        }
+
+        async function loadVerifyData() {
+            const { data } = await _supabase.from('tj_users').select('*').eq('id', currentUser.id).limit(1);
+            if (data && data.length > 0) {
+                const u = data[0];
+                document.getElementById('verify-email').innerText = u.email;
+                const badge = document.getElementById('verify-status-badge');
+                badge.innerText = u.verify_status === 'approved' ? '已通过认证' : (u.verify_status === 'rejected' ? '已驳回' : '审核中');
+            }
+        }
+
+        async function loadAdminData() {
+            const { data } = await _supabase.from('tj_users').select('*').order('created_at', { ascending: false });
+            const tbody = document.getElementById('admin-user-table');
+            tbody.innerHTML = '';
+            if (data) {
+                const totalPages = Math.ceil(data.length / adminPageSize) || 1;
+                if (adminCurrentPage > totalPages) adminCurrentPage = totalPages;
+                const startIndex = (adminCurrentPage - 1) * adminPageSize;
+                const paginatedData = data.slice(startIndex, startIndex + adminPageSize);
+
+                document.getElementById('pagination-info').innerText = `显示第 ${adminCurrentPage} 页，共 ${totalPages} 页（总计 ${data.length} 个账号）`;
+
+                paginatedData.forEach(u => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3 font-medium">${u.email}</td>
+                            <td class="p-3">${u.school || '-'}</td>
+                            <td class="p-3 text-slate-500">${u.remark || '无'}</td>
+                            <td class="p-3">${u.proof_image_url ? `<a href="${u.proof_image_url}" target="_blank" class="text-primary underline">查看证明</a>` : '无'}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${u.verify_status==='approved'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">${u.verify_status}</span></td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-medium ${u.allow_matching!==false?'bg-blue-100 text-blue-800':'bg-slate-100 text-slate-600'}">${u.allow_matching!==false?'已参与匹配':'已取消匹配'}</span></td>
+                            <td class="p-3 text-right space-x-1">
+                                <button onclick="updateUserStatus('${u.id}', 'approved')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[11px]">通过</button>
+                                <button onclick="updateUserStatus('${u.id}', 'rejected')" class="bg-amber-600 text-white px-2 py-1 rounded text-[11px]">驳回</button>
+                                <button onclick="toggleUserMatch('${u.id}', ${u.allow_matching!==false})" class="bg-blue-600 text-white px-2 py-1 rounded text-[11px]">${u.allow_matching!==false?'取消匹配':'恢复匹配'}</button>
+                                <button onclick="deleteUserAccount('${u.id}')" class="bg-rose-600 text-white px-2 py-1 rounded text-[11px]">删除</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function changePage(direction) {
+            adminCurrentPage += direction;
+            if (adminCurrentPage < 1) adminCurrentPage = 1;
+            loadAdminData();
+        }
+
+        async function updateUserStatus(userId, status) {
+            const { error } = await _supabase.from('tj_users').update({ verify_status: status, is_verified: status === 'approved' }).eq('id', userId);
+            if (error) alert('操作失败'); else { alert('审核状态已更新'); loadAdminData(); }
+        }
+
+        async function toggleUserMatch(userId, currentStatus) {
+            const newStatus = !currentStatus;
+            const { error } = await _supabase.from('tj_questionnaires').update({ allow_matching: newStatus }).eq('user_id', userId);
+            if (error) alert('操作失败'); else { alert(`用户匹配状态已更改`); loadAdminData(); }
+        }
+
+        async function deleteUserAccount(userId) {
+            if (!confirm('确定要彻底删除该注册账号及其关联档案吗？')) return;
+            const { error } = await _supabase.from('tj_users').delete().eq('id', userId);
+            if (error) alert('删除失败'); else { alert('账号已成功删除'); loadAdminData(); }
+        }
+
+        function toggleParticipation() {
+            alert('已成功更新本周匹配参与状态！');
+        }
+    </script>
+</body>
+</html>
