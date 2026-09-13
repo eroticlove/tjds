@@ -66,7 +66,7 @@
                 <div class="bg-white/95 backdrop-blur-xl p-8 rounded-2xl shadow-2xl max-w-md w-full border border-white/25">
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 bg-primary rounded-xl mx-auto flex items-center justify-center text-white font-bold text-xl shadow-lg">津</div>
-                        <h1 class="font-bold text-2xl text-slate-800 mt-3">津缘 TJSd</h1>
+                        <h1 class="font-bold text-2xl text-slate-800 mt-3">津缘 TJDs</h1>
                         <p class="text-xs text-slate-500 mt-1">天津高校学子专属交友平台</p>
                     </div>
 
@@ -485,7 +485,7 @@
         const adminPageSize = 5;
 
         window.addEventListener('DOMContentLoaded', () => {
-            const savedUser = localStorage.getItem('tjsd_current_user');
+            const savedUser = localStorage.getItem('TJDs_current_user');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 showMainApp();
@@ -600,9 +600,9 @@
             const file = event.target.files[0];
             if (!file) return;
             const fileName = `card_${Date.now()}_${file.name}`;
-            const { error } = await _supabase.storage.from('tjsd-uploads').upload(fileName, file);
+            const { error } = await _supabase.storage.from('TJDs-uploads').upload(fileName, file);
             if (error) { alert('上传失败: ' + error.message); return; }
-            const { data: pubData } = _supabase.storage.from('tjsd-uploads').getPublicUrl(fileName);
+            const { data: pubData } = _supabase.storage.from('TJDs-uploads').getPublicUrl(fileName);
             document.getElementById('reg-card-url').value = pubData.publicUrl;
             document.getElementById('upload-status').innerText = '✔ 证明材料上传成功！';
         }
@@ -628,7 +628,7 @@
             else {
                 alert('注册成功！请等待管理员审核。');
                 currentUser = data[0];
-                localStorage.setItem('tjsd_current_user', JSON.stringify(currentUser));
+                localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
                 showMainApp();
             }
         }
@@ -639,9 +639,9 @@
             const password = document.getElementById('login-password').value;
 
             // 超级管理员直接登录校验
-            if ((inputEmail === 'Admin' || inputEmail === 'xyhh99@qq.com') && password === 'TJSd@260913') {
+            if ((inputEmail === 'Admin' || inputEmail === 'xyhh99@qq.com') && password === 'TJDs@260913') {
                 currentUser = { id: 'admin_root_id', email: 'xyhh99@qq.com', nickname: '超级管理员', verify_status: 'approved' };
-                localStorage.setItem('tjsd_current_user', JSON.stringify(currentUser));
+                localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
                 showMainApp();
                 return;
             }
@@ -657,7 +657,7 @@
                 currentUser = data[0];
             }
 
-            localStorage.setItem('tjsd_current_user', JSON.stringify(currentUser));
+            localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
             showMainApp();
         }
 
@@ -675,7 +675,7 @@
         }
 
         function logout() {
-            localStorage.removeItem('tjsd_current_user');
+            localStorage.removeItem('TJDs_current_user');
             currentUser = null;
             showAuthView();
         }
