@@ -85,12 +85,12 @@
                         <label class="block text-xs font-semibold text-slate-600 mb-1">电子邮箱（支持 163/QQ/高校邮箱）</label>
                         <div class="flex space-x-2">
                             <input type="email" id="reg-email" required placeholder="name@example.com" class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
-                            <button type="button" onclick="sendCustomVerificationCode('reg')" id="btn-send-code" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 text-xs rounded-xl transition">发送验证码</button>
+                            <button type="button" onclick="sendRealEmailCode()" id="btn-send-code" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 text-xs rounded-xl transition">发送验证码</button>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">6位数字邮箱验证码</label>
-                        <input type="text" id="reg-code" required placeholder="请输入收到的6位验证码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">邮箱 6 位验证码 (Supabase SMTP)</label>
+                        <input type="text" id="reg-code" required placeholder="输入收到的6位数字验证码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">设置登录密码</label>
@@ -109,7 +109,7 @@
                         </select>
                     </div>
                     <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <label class="block text-xs font-bold text-primary">学生证明或证件上传（非试点高校或无对应邮箱用户）</label>
+                        <label class="block text-xs font-bold text-primary">学生证明或证件上传（非试点高校或无edu邮箱用户）</label>
                         <input type="file" id="reg-card-file" accept="image/*" onchange="uploadStudentCard(event)" class="text-xs text-slate-500 w-full file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
                         <input type="hidden" id="reg-card-url">
                         <div id="upload-status" class="text-xs text-emerald-600 mt-1"></div>
@@ -123,11 +123,11 @@
                         <label class="block text-xs font-semibold text-slate-600 mb-1">注册邮箱</label>
                         <div class="flex space-x-2">
                             <input type="email" id="forgot-email" required placeholder="输入账号邮箱" class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl">
-                            <button type="button" onclick="sendCustomVerificationCode('forgot')" id="btn-forgot-send" class="bg-slate-800 text-white px-3 py-2 text-xs rounded-xl">发验证码</button>
+                            <button type="button" onclick="sendForgotCode()" class="bg-slate-800 text-white px-3 py-2 text-xs rounded-xl">发验证码</button>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">6位数字验证码</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">邮箱 6 位验证码</label>
                         <input type="text" id="forgot-code" required placeholder="6位验证码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl">
                     </div>
                     <div>
@@ -363,54 +363,37 @@
         }
 
         /**
-         * 核心：生成纯 6 位数字验证码并写入 tj_verifications 表，同时调用 Supabase SMTP 发信
+         * 调用 Supabase 内置 SMTP 发送真正的 6 位验证码 (OTP)
          */
-        async function sendCustomVerificationCode(type) {
-            const emailInputId = type === 'reg' ? 'reg-email' : 'forgot-email';
-            const btnId = type === 'reg' ? 'btn-send-code' : 'btn-forgot-send';
-            const email = document.getElementById(emailInputId).value.trim();
-            
+        async function sendRealEmailCode() {
+            const email = document.getElementById('reg-email').value.trim();
             if (!email) { alert('请先输入电子邮箱'); return; }
-
-            const btn = document.getElementById(btnId);
+            
+            const btn = document.getElementById('btn-send-code');
             btn.innerText = '发送中...';
             btn.disabled = true;
 
             try {
-                // 1. 生成标准的 6 位纯数字验证码
-                const code = Math.floor(100000 + Math.random() * 900000).toString();
-                const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10分钟有效
-
-                // 2. 写入自定义的 tj_verifications 数据库表
-                const { error: dbError } = await _supabase.from('tj_verifications').insert([{
-                    email,
-                    code,
-                    expires_at: expiresAt,
-                    used: false
-                }]);
-
-                if (dbError) {
-                    throw new Error('验证码数据库记录写入失败: ' + dbError.message);
+                const { error } = await _supabase.auth.signInWithOtp({ email });
+                if (error) {
+                    alert('邮件发送失败: ' + error.message + '\n请检查 Supabase 后台 SMTP 配置。');
+                } else {
+                    alert(`[津缘邮件系统] 验证码已通过SMTP成功发送至 ${email}，请查收邮件获取6位数字验证码。`);
                 }
-
-                // 3. 通过 Supabase Auth 的重置/魔法链接通道触发邮件网关，或者利用内置模板将 {{ .Token }} 发出
-                // 此处我们利用 Supabase signInWithOtp 配合后台模板发送刚才写入的专属 6 位码（前提是后台模板已填好 {{ .Token }}）
-                // 此外，为了绝对百分之百同步，我们直接调用 Supabase 内置的 recovery / signup 邮件发送
-                const { error: mailError } = type === 'reg' 
-                    ? await _supabase.auth.signInWithOtp({ email, options: { data: { token: code } } })
-                    : await _supabase.auth.resetPasswordForEmail(email);
-
-                if (mailError) {
-                    console.warn('Auth trigger warning:', mailError.message);
-                }
-
-                alert(`[津缘邮件系统] 6位数字验证码已成功发送至 ${email}，请查收邮件！（测试期间如遇延迟，请核对收件箱或垃圾箱）\n\n【提示：当前生成的验证码为: ${code}】`);
             } catch (err) {
                 alert('发送异常: ' + err.message);
             } finally {
                 btn.innerText = '发送验证码';
                 btn.disabled = false;
             }
+        }
+
+        async function sendForgotCode() {
+            const email = document.getElementById('forgot-email').value.trim();
+            if (!email) { alert('请先输入账号邮箱'); return; }
+            const { error } = await _supabase.auth.signInWithOtp({ email });
+            if (error) alert('重置邮件发送失败: ' + error.message);
+            else alert(`[密码重置] 验证码已通过SMTP发送至 ${email}`);
         }
 
         async function uploadStudentCard(event) {
@@ -427,47 +410,28 @@
         async function handleRegister(event) {
             event.preventDefault();
             const email = document.getElementById('reg-email').value.trim();
-            const inputCode = document.getElementById('reg-code').value.trim();
+            const code = document.getElementById('reg-code').value.trim();
             const password = document.getElementById('reg-password').value;
             const school = document.getElementById('reg-school').value;
             const proof_image_url = document.getElementById('reg-card-url').value;
 
-            // 1. 校验自建表 tj_verifications 中的 6 位数字验证码
-            const { data: vData, error: vError } = await _supabase
-                .from('tj_verifications')
-                .select('*')
-                .eq('email', email)
-                .eq('used', false)
-                .order('created_at', { ascending: false })
-                .limit(1);
-
-            if (vError || !vData || vData.length === 0) {
-                alert('未找到该邮箱的验证码记录，请先点击发送验证码。');
-                return;
-            }
-
-            const record = vData[0];
-            if (record.code !== inputCode) {
-                alert('验证码输入错误，请重新核对！');
-                return;
-            }
-            if (new Date(record.expires_at) < new Date()) {
-                alert('验证码已过期，请重新获取。');
-                return;
-            }
-
-            // 标记该验证码为已使用
-            await _supabase.from('tj_verifications').update({ used: true }).eq('id', record.id);
-
-            // 2. 在 Supabase Auth 中创建真实账号
-            const { data: authData, error: authError } = await _supabase.auth.signUp({
+            // 1. 严格校验 Supabase Auth 发送的真实 6 位验证码
+            const { data: authData, error: authError } = await _supabase.auth.verifyOtp({
                 email,
-                password
+                token: code,
+                type: 'email'
             });
 
-            if (authError && !authError.message.includes('already registered')) {
-                alert('Auth 账号注册失败: ' + authError.message);
+            if (authError) {
+                alert('验证码校验失败或已过期: ' + authError.message);
                 return;
+            }
+
+            // 2. 同时在 Supabase Auth 中完成用户密码初始化（若该邮箱未创建账号）
+            // 注：signInWithOtp 成功验证后，用户已经处于会话中，此处直接更新密码
+            const { error: pwdError } = await _supabase.auth.updateUser({ password: password });
+            if (pwdError) {
+                console.warn('密码更新提示：', pwdError.message);
             }
 
             // 3. 写入自定义的 tj_users 表
@@ -481,10 +445,10 @@
             }]).select();
 
             if (error) {
-                // 如果已存在则直接查询
-                const { data: existUser } = await _supabase.from('tj_users').select('*').eq('email', email).limit(1);
-                if (existUser && existUser.length > 0) {
-                    currentUser = existUser[0];
+                // 如果用户已存在，尝试直接获取
+                const { data: existData } = await _supabase.from('tj_users').select('*').eq('email', email).limit(1);
+                if (existData && existData.length > 0) {
+                    currentUser = existData[0];
                 } else {
                     alert('注册档案写入失败: ' + error.message);
                     return;
@@ -493,8 +457,9 @@
                 currentUser = data[0];
             }
 
-            alert('注册成功！请登录系统。');
-            switchAuthMode('login');
+            alert('注册验证成功！请等待管理员审核。');
+            localStorage.setItem('tjsd_current_user', JSON.stringify(currentUser));
+            showMainApp();
         }
 
         async function handleLogin(event) {
@@ -537,27 +502,15 @@
         async function handleForgot(event) {
             event.preventDefault();
             const email = document.getElementById('forgot-email').value.trim();
-            const inputCode = document.getElementById('forgot-code').value.trim();
+            const code = document.getElementById('forgot-code').value.trim();
             const newPassword = document.getElementById('forgot-new-password').value;
 
-            // 校验自建表验证码
-            const { data: vData, error: vError } = await _supabase
-                .from('tj_verifications')
-                .select('*')
-                .eq('email', email)
-                .eq('used', false)
-                .order('created_at', { ascending: false })
-                .limit(1);
+            const { error: vError } = await _supabase.auth.verifyOtp({ email, token: code, type: 'recovery' });
+            if (vError) { alert('验证码错误: ' + vError.message); return; }
 
-            if (vError || !vData || vData.length === 0 || vData[0].code !== inputCode) {
-                alert('验证码错误或不存在');
-                return;
-            }
-
-            await _supabase.from('tj_verifications').update({ used: true }).eq('id', vData[0].id);
-
-            alert('验证通过！由于 Supabase 密码重置需通过后台重置 API，建议您直接使用原密码或联系管理员。');
-            switchAuthMode('login');
+            const { error } = await _supabase.auth.updateUser({ password: newPassword });
+            if (error) alert('密码重置失败: ' + error.message); 
+            else { alert('密码重置成功，请重新登录'); switchAuthMode('login'); }
         }
 
         function logout() {
