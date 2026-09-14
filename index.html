@@ -1,1070 +1,906 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="h-full">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>津缘 - 天津高校学子专属交友平台</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        tjds: {
-                            50: '#fdf4f6',
-                            100: '#fbe8ee',
-                            500: '#e11d48',
-                            600: '#be123c',
-                            700: '#9f1239',
-                            900: '#881337',
-                        }
+                        primary: '#0284c7',
+                        primaryHover: '#0369a1',
+                        cream: '#f0f9ff',
+                        cardBg: '#ffffff',
+                        borderClr: '#e0f2fe'
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif']
+                        sans: ['"Plus Jakarta Sans"', '"Noto Sans SC"', 'sans-serif']
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome & Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .hero-bg {
-            background: linear-gradient(135deg, rgba(136, 19, 55, 0.85) 0%, rgba(190, 18, 60, 0.75) 50%, rgba(225, 29, 72, 0.6) 100%), url('https://img.remit.ee/i/c784Y');
-            background-size: cover;
-            background-position: center;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 3px;
-        }
+        body { background-color: #f8fafc; font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif; color: #1e293b; }
+        input[type="range"] { accent-color: #0284c7; }
     </style>
 </head>
-<body class="h-full bg-slate-50 text-slate-800 flex flex-col font-sans antialiased">
-
-    <!-- Custom Modal for Alerts/Messages -->
-    <div id="customModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl transform transition-all">
-            <div id="modalIconContainer" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-rose-100 text-rose-600 text-xl">
-                <i id="modalIcon" class="fa-solid fa-heart"></i>
-            </div>
-            <h3 id="modalTitle" class="text-lg font-bold text-center text-slate-900 mb-2">温馨提示</h3>
-            <p id="modalMessage" class="text-sm text-slate-600 text-center mb-6">内容提示信息...</p>
-            <div id="modalButtons" class="flex space-x-3">
-                <button onclick="closeModal()" class="w-full py-2.5 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 transition shadow-lg shadow-rose-600/20">确定</button>
-            </div>
+<body class="min-h-screen flex flex-col justify-between">
+    <!-- 顶部导航栏 -->
+    <header id="navbar" class="hidden bg-white/90 backdrop-blur-md border-b border-borderClr sticky top-0 z-50 px-6 py-3 flex justify-between items-center shadow-sm">
+        <div class="flex items-center space-x-2 cursor-pointer" onclick="switchTab(currentUser && (currentUser.email === 'Admin' || currentUser.email === 'xyhh99@qq.com') ? 'admin' : 'home')">
+            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">津</div>
+            <span class="font-bold text-xl text-primary tracking-wider">津缘 TJDs</span>
+            <span id="system-mode-tag" class="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium ml-2">学生端系统</span>
         </div>
-    </div>
-
-    <!-- Navigation Header -->
-    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
-                <div class="w-11 h-11 bg-rose-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rose-600/30 transform hover:rotate-6 transition">
-                    <i class="fa-solid fa-graduation-cap text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">津缘 TJDs</h1>
-                    <p class="text-xs text-slate-500 font-medium tracking-wide">天津高校学子专属交友平台</p>
-                </div>
-            </div>
-
-            <!-- Desktop Nav Links -->
-            <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
-                <button onclick="switchTab('home')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition active-tab" data-target="home">
-                    <i class="fa-solid fa-house mr-1.5"></i> 首页
-                </button>
-                <button onclick="switchTab('questionnaire')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition" data-target="questionnaire">
-                    <i class="fa-solid fa-file-lines mr-1.5"></i> 问卷建档
-                </button>
-                <button onclick="switchTab('notices')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition" data-target="notices">
-                    <i class="fa-solid fa-bullhorn mr-1.5"></i> 公告反馈
-                </button>
-                <button onclick="switchTab('about')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition" data-target="about">
-                    <i class="fa-solid fa-shield-halved mr-1.5"></i> 关于与隐私
-                </button>
-                <div id="adminNavContainer" class="hidden">
-                    <button onclick="switchTab('admin')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-rose-700 bg-rose-100 hover:bg-rose-200 transition" data-target="admin">
-                        <i class="fa-solid fa-crown mr-1.5"></i> 管理员后台
-                    </button>
-                </div>
-            </nav>
-
-            <!-- User Auth Profile Widget -->
-            <div class="flex items-center space-x-3">
-                <div id="authWidget" class="flex items-center space-x-2">
-                    <button onclick="openAuthModal('login')" class="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-rose-600 transition">登录</button>
-                    <button onclick="openAuthModal('register')" class="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-600/20 transition">注册</button>
-                </div>
-                <div id="userProfileWidget" class="hidden flex items-center space-x-3 bg-slate-100 py-1.5 px-3 rounded-2xl">
-                    <div class="w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-sm" id="userAvatarText">U</div>
-                    <div class="hidden sm:block text-left">
-                        <p class="text-xs font-bold text-slate-800 truncate max-w-[100px]" id="userNameDisplay">用户</p>
-                        <p class="text-[10px] text-slate-500" id="userRoleDisplay">认证学子</p>
-                    </div>
-                    <button onclick="logoutUser()" title="退出登录" class="text-slate-400 hover:text-rose-600 p-1 transition"><i class="fa-solid fa-right-from-bracket"></i></button>
-                </div>
-                <!-- Mobile Menu Toggle -->
-                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition">
-                    <i class="fa-solid fa-bars text-lg"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Mobile Nav Menu -->
-        <div id="mobileMenu" class="hidden md:hidden border-t border-slate-100 bg-white px-4 pt-2 pb-4 space-y-1">
-            <button onclick="switchTab('home'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-rose-50 hover:text-rose-600">首页</button>
-            <button onclick="switchTab('questionnaire'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-rose-50 hover:text-rose-600">问卷建档</button>
-            <button onclick="switchTab('notices'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-rose-50 hover:text-rose-600">公告反馈</button>
-            <button onclick="switchTab('about'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-rose-50 hover:text-rose-600">关于与隐私</button>
-            <div id="mobileAdminContainer" class="hidden">
-                <button onclick="switchTab('admin'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-700 bg-rose-50">管理员后台</button>
-            </div>
+        <nav id="nav-menu-container" class="hidden md:flex items-center space-x-8 text-sm font-medium">
+            <!-- 动态渲染导航 -->
+        </nav>
+        <div class="flex items-center space-x-4">
+            <span id="user-display-name" class="text-sm font-medium text-slate-700"></span>
+            <button onclick="logout()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition">退出登录</button>
         </div>
     </header>
 
-    <!-- Main Dynamic Content Container -->
+    <!-- 主容器 -->
     <main class="flex-grow">
+        <!-- 1. 登录与注册页 (封面与认证) -->
+        <section id="view-auth" class="min-h-screen flex flex-col justify-between bg-cover bg-center" style="background-image: linear-gradient(rgba(15,23,42,0.45), rgba(15,23,42,0.65)), url('https://img.remit.ee/i/c784YEKLJhxP');">
+            <div class="p-6 flex justify-between items-center text-white/90 text-sm">
+                <div class="flex items-center space-x-2 font-bold text-lg"><span class="bg-primary px-2 py-1 rounded text-white">津</span><span>TJDs</span></div>
+                <div class="space-x-6">
+                    <button onclick="switchPublicTab('announcement')" class="hover:text-white transition">公告</button>
+                    <button onclick="switchPublicTab('about')" class="hover:text-white transition">关于</button>
+                    <button onclick="switchPublicTab('privacy')" class="hover:text-white transition">隐私</button>
+                </div>
+            </div>
+            <div class="flex items-center justify-center p-4">
+                <div class="bg-white/95 backdrop-blur-xl p-8 rounded-2xl shadow-2xl max-w-md w-full border border-white/25">
+                    <div class="text-center mb-6">
+                        <div class="w-12 h-12 bg-primary rounded-xl mx-auto flex items-center justify-center text-white font-bold text-xl shadow-lg">津</div>
+                        <h1 class="font-bold text-2xl text-slate-800 mt-3">津缘 TJDs</h1>
+                        <p class="text-xs text-slate-500 mt-1">天津高校学子专属交友平台（百花争鸣）</p>
+                    </div>
+                    <div class="flex border-b border-slate-200 mb-6 text-sm font-medium">
+                        <button onclick="switchAuthMode('login')" id="tab-login" class="flex-1 pb-2 text-center border-b-2 border-primary text-primary font-semibold">账号登录</button>
+                        <button onclick="switchAuthMode('register')" id="tab-register" class="flex-1 pb-2 text-center text-slate-400">新用户注册</button>
+                        <button onclick="switchAuthMode('forgot')" id="tab-forgot" class="flex-1 pb-2 text-center text-slate-400">找回密码</button>
+                    </div>
 
-        <!-- 1. HOME TAB -->
-        <section id="tab-home" class="tab-content">
-            <!-- Hero with Tianjin Eye background -->
-            <div class="hero-bg text-white py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-                <div class="max-w-5xl mx-auto text-center relative z-10">
-                    <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white mb-6 border border-white/20">
-                        <i class="fa-solid fa-heart-pulse mr-2 text-rose-300 animate-pulse"></i> 天津高校学子专属交友平台 · 百花争鸣 (TJDs)
-                    </span>
-                    <h1 class="text-4xl sm:text-6xl font-black tracking-tight mb-6">
-                        相遇在海河之滨 <br>开启专属高校缘分
-                    </h1>
-                    <p class="text-lg sm:text-xl text-rose-100 max-w-2xl mx-auto mb-10 font-medium">
-                        严谨实名验证，汇聚天津大学、南开大学等试点高校学子。每周六下午 12:30 准时开启真诚匹配！
-                    </p>
+                    <!-- 登录表单 -->
+                    <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">登录邮箱 / 管理员账号</label>
+                            <input type="text" id="login-email" required placeholder="输入注册邮箱或 xyhh99@qq.com" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">登录密码</label>
+                            <input type="password" id="login-password" required placeholder="请输入密码" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg transition">安全登录系统</button>
+                    </form>
 
-                    <!-- Countdown Timer Card -->
-                    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 max-w-xl mx-auto shadow-2xl mb-8">
-                        <p class="text-xs font-bold uppercase tracking-widest text-rose-200 mb-3"><i class="fa-regular fa-clock mr-1"></i> 距离下一期每周六匹配倒计时</p>
-                        <div class="grid grid-cols-4 gap-3 text-white">
-                            <div class="bg-black/30 rounded-2xl p-3 border border-white/10">
-                                <span id="cd-days" class="text-3xl font-black block">00</span>
-                                <span class="text-[11px] text-rose-200 uppercase font-semibold">天</span>
-                            </div>
-                            <div class="bg-black/30 rounded-2xl p-3 border border-white/10">
-                                <span id="cd-hours" class="text-3xl font-black block">00</span>
-                                <span class="text-[11px] text-rose-200 uppercase font-semibold">时</span>
-                            </div>
-                            <div class="bg-black/30 rounded-2xl p-3 border border-white/10">
-                                <span id="cd-mins" class="text-3xl font-black block">00</span>
-                                <span class="text-[11px] text-rose-200 uppercase font-semibold">分</span>
-                            </div>
-                            <div class="bg-black/30 rounded-2xl p-3 border border-white/10">
-                                <span id="cd-secs" class="text-3xl font-black block text-rose-300">00</span>
-                                <span class="text-[11px] text-rose-200 uppercase font-semibold">秒</span>
+                    <!-- 注册表单 -->
+                    <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">电子邮箱（支持高校邮箱或QQ/163邮箱）</label>
+                            <div class="flex space-x-2">
+                                <input type="email" id="reg-email" required placeholder="name@example.com" class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                                <button type="button" onclick="sendRealEmailCode()" id="btn-send-code" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 text-xs rounded-xl transition">发送验证码</button>
                             </div>
                         </div>
-                    </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">邮箱 6 位数字验证码</label>
+                            <input type="text" id="reg-code" required placeholder="输入邮件收到的6位验证码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">设置登录密码</label>
+                            <input type="password" id="reg-password" required placeholder="不少于6位安全密码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">所属天津高校（试点高校）</label>
+                            <select id="reg-school" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                                <option value="天津大学">天津大学</option>
+                                <option value="南开大学">南开大学</option>
+                                <option value="天津师范大学">天津师范大学</option>
+                                <option value="天津医科大学">天津医科大学</option>
+                                <option value="天津理工大学">天津理工大学</option>
+                                <option value="天津仁爱学院">天津仁爱学院</option>
+                                <option value="其他高校">其他高校（需上传学生证明）</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <label class="block text-xs font-bold text-primary">学生证明或学信网截图（非试点高校必传）</label>
+                            <input type="file" id="reg-card-file" accept="image/*" onchange="uploadStudentCard(event)" class="text-xs text-slate-500 w-full file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
+                            <input type="hidden" id="reg-card-url">
+                            <div id="upload-status" class="text-xs text-emerald-600 mt-1"></div>
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg transition">确认注册并进入系统</button>
+                    </form>
 
-                    <div class="flex flex-wrap justify-center gap-4">
-                        <button onclick="switchTab('questionnaire')" class="px-8 py-4 bg-white text-rose-700 hover:bg-rose-50 font-bold rounded-2xl shadow-xl transition transform hover:-translate-y-0.5">
-                            <i class="fa-solid fa-pen-to-square mr-2"></i> 填写问卷建档
-                        </button>
-                        <a href="#success-wall" class="px-8 py-4 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl shadow-xl transition border border-rose-400">
-                            <i class="fa-solid fa-trophy mr-2"></i> 查看成功配对墙
-                        </a>
-                    </div>
+                    <!-- 密码找回表单 -->
+                    <form id="form-forgot" onsubmit="handleForgot(event)" class="space-y-4 hidden">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">注册邮箱</label>
+                            <div class="flex space-x-2">
+                                <input type="email" id="forgot-email" required placeholder="输入账号邮箱" class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl">
+                                <button type="button" onclick="sendForgotCode()" class="bg-slate-800 text-white px-3 py-2 text-xs rounded-xl">发验证码</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">邮箱验证码</label>
+                            <input type="text" id="forgot-code" required placeholder="6位验证码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">新密码</label>
+                            <input type="password" id="forgot-new-password" required placeholder="输入新密码" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl">
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg">重置密码并登录</button>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center py-4 text-xs text-white/70">
+                Copyright © 2026 TJDs's team All Rights Reserved.
+            </div>
+        </section>
+
+        <!-- 公共浮动弹窗 (未登录点击 公告/关于/隐私 时展示) -->
+        <div id="public-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 relative">
+                <button onclick="closePublicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
+                <div id="public-modal-content"></div>
+            </div>
+        </div>
+
+        <!-- 2. 学生端 - 首页概览（含实时倒计时与多期匹配分页） -->
+        <section id="view-home" class="hidden max-w-4xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr flex justify-between items-center">
+                <div>
+                    <h2 class="font-bold text-2xl text-slate-800">你好，<span id="home-nickname" class="text-primary">同学</span></h2>
+                    <p class="text-sm text-slate-500 mt-1">当前账号审核状态：<span id="home-audit-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">资料审核中</span></p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">下次定时配对倒计时</span>
+                    <span id="countdown-timer" class="text-base font-bold text-primary">--天--小时--分--秒</span>
                 </div>
             </div>
 
-            <!-- Stats Bar -->
-            <div class="bg-white border-b border-slate-200 py-6">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                    <div class="p-4 border-r border-slate-100 last:border-0">
-                        <p class="text-3xl sm:text-4xl font-black text-rose-600 mb-1" id="stat-participants">1,286</p>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">云端真实参与人数</p>
+            <!-- 本周匹配控制卡片 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr space-y-4">
+                <h3 class="font-bold text-lg text-slate-800">本周匹配控制</h3>
+                <div class="p-4 bg-cream rounded-xl border border-blue-100 flex justify-between items-center">
+                    <div>
+                        <span class="text-xs font-bold text-primary block">参与当次智能双向匹配</span>
+                        <span id="participation-status-text" class="text-xs text-slate-600 mt-0.5 block">每周六下午 12:30 截止参与</span>
                     </div>
-                    <div class="p-4 border-r border-slate-100 last:border-0">
-                        <p class="text-3xl sm:text-4xl font-black text-slate-900 mb-1">6所</p>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">天津试点高校覆盖</p>
-                    </div>
-                    <div class="p-4 border-r border-slate-100 last:border-0">
-                        <p class="text-3xl sm:text-4xl font-black text-rose-600 mb-1" id="stat-matches">342</p>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">累计成功牵线配对</p>
-                    </div>
-                    <div class="p-4">
-                        <p class="text-3xl sm:text-4xl font-black text-slate-900 mb-1">100%</p>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">学子实名身份保障</p>
-                    </div>
+                    <button onclick="toggleParticipation()" id="btn-participate" class="bg-primary text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow-sm">切换本周参与状态</button>
                 </div>
             </div>
 
-            <!-- Success Pairing Wall Section -->
-            <div id="success-wall" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-2xl mx-auto mb-12">
-                    <span class="text-rose-600 font-bold text-xs uppercase tracking-widest bg-rose-100 px-3 py-1 rounded-full">TJDs Hall of Fame</span>
-                    <h2 class="text-3xl font-black text-slate-900 mt-3 mb-3">每一期成功配对记录墙</h2>
-                    <p class="text-slate-600 text-sm">见证津门学子在百花争鸣中的浪漫邂逅。由管理员定期编辑更新的往期配对成果与感言。</p>
-                </div>
-
-                <!-- Success Wall Grid -->
-                <div id="successWallGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Populated dynamically via JS -->
-                </div>
-
-                <!-- Pagination for Success Wall -->
-                <div class="flex justify-center items-center space-x-3 mt-10" id="successPagination">
-                    <!-- Pagination buttons generated by JS -->
+            <!-- 历届匹配数据分页小模块展示 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr space-y-4">
+                <h3 class="font-bold text-lg text-slate-800">历届匹配成功数据看板</h3>
+                <div id="history-match-pagination-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <!-- 动态加载各期数据 -->
                 </div>
             </div>
         </section>
 
-        <!-- 2. QUESTIONNAIRE TAB -->
-        <section id="tab-questionnaire" class="tab-content hidden py-12 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden p-8 sm:p-10">
-                <div class="border-b border-slate-100 pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <!-- 3. 学生端 - 五维度全面问卷建档页 -->
+        <section id="view-questionnaire" class="hidden max-w-4xl mx-auto p-6 space-y-8">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr">
+                <div class="flex justify-between items-center mb-6 border-b pb-4">
                     <div>
-                        <span class="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-full uppercase tracking-wider">深度档案建档</span>
-                        <h2 class="text-2xl font-black text-slate-900 mt-2">津缘（TJDs）五维交友问卷系统</h2>
+                        <h2 class="font-bold text-xl text-primary">全方位学生建档与问卷系统（5大维度）</h2>
+                        <p class="text-xs text-slate-500 mt-1">请详细填写，以便管理员与系统进行智能化精准配对。</p>
                     </div>
-                    <p class="text-xs text-slate-500 mt-2 sm:mt-0 font-medium"><i class="fa-solid fa-lock text-rose-500 mr-1"></i> 数据严格加密，仅用于算法匹配</p>
+                    <span id="questionnaire-save-tip" class="text-xs text-emerald-600 font-medium"></span>
                 </div>
-
-                <form id="questionnaireForm" onsubmit="submitQuestionnaire(event)" class="space-y-8">
-                    <!-- Dimension 1: 基本信息与现实约束 -->
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center">
-                            <span class="w-7 h-7 bg-rose-600 text-white rounded-xl flex items-center justify-center text-xs mr-2">1</span>
-                            基本信息与现实约束
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <form id="form-questionnaire" onsubmit="saveQuestionnaire(event)" class="space-y-6 text-sm">
+                    <!-- 模块一：基本信息与现实约束 -->
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-4 border border-slate-200">
+                        <h3 class="font-bold text-primary text-base">一、基本信息与现实约束</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">真实姓名/昵称</label>
-                                <input type="text" id="q_name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-sm bg-white">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">真实姓名</label>
+                                <input type="text" id="q-real_name" class="w-full px-3 py-2 border rounded-xl bg-white">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">就读高校</label>
-                                <select id="q_university" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-sm bg-white">
-                                    <option value="">请选择试点高校</option>
-                                    <option value="天津大学">天津大学</option>
-                                    <option value="南开大学">南开大学</option>
-                                    <option value="天津师范大学">天津师范大学</option>
-                                    <option value="天津医科大学">天津医科大学</option>
-                                    <option value="天津理工大学">天津理工大学</option>
-                                    <option value="天津仁爱学院">天津仁爱学院</option>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">昵称（对方可见）</label>
+                                <input type="text" id="q-nickname" required class="w-full px-3 py-2 border rounded-xl bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">1. 我的性别</label>
+                                <select id="q-gender" class="w-full px-3 py-2 border rounded-xl bg-white">
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                    <option value="其他">其他</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">年级学历</label>
-                                <select id="q_grade" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-sm bg-white">
-                                    <option value="大一">大一</option>
-                                    <option value="大二">大二</option>
-                                    <option value="大三">大三</option>
-                                    <option value="大四">大四</option>
-                                    <option value="硕士研究生">硕士研究生</option>
-                                    <option value="博士研究生">博士研究生</option>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">2. 我希望匹配对象的性别</label>
+                                <select id="q-match_gender_pref" class="w-full px-3 py-2 border rounded-xl bg-white">
+                                    <option value="异性">异性</option>
+                                    <option value="同性">同性</option>
+                                    <option value="不限">不限</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">校区/地理约束偏好</label>
-                                <input type="text" id="q_location" placeholder="例如：卫津路校区/北洋园校区" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-sm bg-white">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">3. 主要目的</label>
+                                <input type="text" id="q-intent" value="认真恋爱 / 认识新朋友" class="w-full px-3 py-2 border rounded-xl bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">4. 我的年级</label>
+                                <input type="text" id="q-grade" placeholder="如：大二 / 研一" class="w-full px-3 py-2 border rounded-xl bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">11.7 我的家乡</label>
+                                <input type="text" id="q-hometown" placeholder="如：广东潮州 / 天津" class="w-full px-3 py-2 border rounded-xl bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">10. 我的身高 (cm)</label>
+                                <input type="number" id="q-height" class="w-full px-3 py-2 border rounded-xl bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">45. 联系方式 (微信/手机，匹配成功可见)</label>
+                                <input type="text" id="q-contact_info" required placeholder="微信号或手机号" class="w-full px-3 py-2 border rounded-xl bg-white">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Dimension 2: 核心价值观与人生方向 -->
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center">
-                            <span class="w-7 h-7 bg-rose-600 text-white rounded-xl flex items-center justify-center text-xs mr-2">2</span>
-                            核心价值观与人生方向
-                        </h3>
-                        <div class="space-y-4">
+                    <!-- 模块二：核心价值观与人生方向 -->
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-4 border border-slate-200">
+                        <h3 class="font-bold text-primary text-base">二、核心价值观与人生方向</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">您对大学期间及毕业后的首要人生规划是什么？</label>
-                                <select id="q_career_plan" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
-                                    <option value="保研/考研深造，追求学术与科研高峰">保研/考研深造，追求学术与科研高峰</option>
-                                    <option value="直接就业，扎根京津冀大厂或名企">直接就业，扎根京津冀大厂或名企</option>
-                                    <option value="体制内发展（选调生、国企、公务员）">体制内发展（选调生、国企、公务员）</option>
-                                    <option value="多元尝试，斜杠青年或准备自主创业">多元尝试，斜杠青年或准备自主创业</option>
-                                </select>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">13. 学业/事业投入程度 (1-10分)</label>
+                                <input type="range" id="q-career_self" min="1" max="10" value="7" class="w-full">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">您核心看重的人生精神内核</label>
-                                <input type="text" id="q_core_value" placeholder="例如：持续成长、松弛感、利他主义、追求卓越等" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">14. 稳定 vs 探索冒险 (1-10分)</label>
+                                <input type="range" id="q-stability_self" min="1" max="10" value="5" class="w-full">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Dimension 3: 生活颗粒度 -->
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center">
-                            <span class="w-7 h-7 bg-rose-600 text-white rounded-xl flex items-center justify-center text-xs mr-2">3</span>
-                            生活颗粒度（日常作息与消费观念）
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- 模块三：生活颗粒度 -->
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-4 border border-slate-200">
+                        <h3 class="font-bold text-primary text-base">三、生活颗粒度 (作息与日常节奏)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">日常作息习惯</label>
-                                <select id="q_schedule" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
-                                    <option value="早睡早起健康型（0点前必睡）">早睡早起健康型（0点前必睡）</option>
-                                    <option value="夜猫子灵感型（凌晨活跃）">夜猫子灵感型（凌晨活跃）</option>
-                                    <option value="弹性作息随遇而安">弹性作息随遇而安</option>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">20. 作息倾向</label>
+                                <select id="q-sleep_habit" class="w-full px-3 py-2 border rounded-xl bg-white">
+                                    <option value="早睡早起">早睡早起</option>
+                                    <option value="规律适中">规律适中</option>
+                                    <option value="夜猫子">夜猫子</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">日常消费与理财观</label>
-                                <select id="q_consumption" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
-                                    <option value="精打细算务实派，注重性价比">精打细算务实派，注重性价比</option>
-                                    <option value="体验优先派，乐于为高品质爱好投资">体验优先派，乐于为高品质爱好投资</option>
-                                    <option value="理性平衡，有储蓄计划也有品质追求">理性平衡，有储蓄计划也有品质追求</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dimension 4: 情感风格 -->
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center">
-                            <span class="w-7 h-7 bg-rose-600 text-white rounded-xl flex items-center justify-center text-xs mr-2">4</span>
-                            情感风格与沟通模式
-                        </h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">当在亲密关系中遇到分歧或矛盾时，您的倾向是：</label>
-                                <select id="q_conflict_style" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
-                                    <option value="即时冷静沟通，开诚布公理性探讨">即时冷静沟通，开诚布公理性探讨</option>
-                                    <option value="各自先冷静一段时间，再温和复盘">各自先冷静一段时间，再温和复盘</option>
-                                    <option value="幽默化解或需要对方给予更多情绪安抚">幽默化解或需要对方给予更多情绪安抚</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">理想的恋爱陪伴频率</label>
-                                <select id="q_company_freq" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
-                                    <option value="灵魂共振，几乎天天黏在一起或共同自习">灵魂共振，几乎天天黏在一起或共同自习</option>
-                                    <option value="保持独立空间，每周高质量约会2-3次">保持独立空间，每周高质量约会2-3次</option>
-                                    <option value="随缘舒服即可，各自学业事业优先">随缘舒服即可，各自学业事业优先</option>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">21. 周末习惯</label>
+                                <select id="q-weekend_habit" class="w-full px-3 py-2 border rounded-xl bg-white">
+                                    <option value="出门探索">出门探索 (Citywalk/运动)</option>
+                                    <option value="宅家休息">宅家休息 (追剧/阅读)</option>
+                                    <option value="平衡灵活">平衡灵活</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Dimension 5: 吸引力与预期 -->
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center">
-                            <span class="w-7 h-7 bg-rose-600 text-white rounded-xl flex items-center justify-center text-xs mr-2">5</span>
-                            吸引力与未来预期
-                        </h3>
-                        <div class="space-y-4">
+                    <!-- 模块四：情感风格 -->
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-4 border border-slate-200">
+                        <h3 class="font-bold text-primary text-base">四、情感风格与相处反应</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">您最欣赏异性身上的特质（可简述）</label>
-                                <textarea id="q_admiration" rows="3" placeholder="例如：独立有主见、具备幽默感、对世界充满好奇心..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"></textarea>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">消息回复速度</label>
+                                <select id="q-msg_reply_speed" class="w-full px-3 py-2 border rounded-xl bg-white">
+                                    <option value="秒回">秒回高频</option>
+                                    <option value="正常频率">正常频率</option>
+                                    <option value="忙完集中回">忙完集中回</option>
+                                </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">您对在“津缘(TJDs)”平台中的最终期待</label>
-                                <input type="text" id="q_expectation" placeholder="例如：寻找志同道合的校园伴侣、拓宽津门高校交友圈" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">发生冲突时的第一反应</label>
+                                <select id="q-conflict_reaction" class="w-full px-3 py-2 border rounded-xl bg-white">
+                                    <option value="先冷静再沟通">先冷静再沟通</option>
+                                    <option value="希望立刻讲清楚">希望立刻讲清楚</option>
+                                    <option value="听对方解释">听对方解释</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full py-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-2xl shadow-xl shadow-rose-600/25 transition">
-                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> 提交完整五维档案至云端
-                    </button>
+                    <!-- 模块五：吸引力与预期 -->
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-4 border border-slate-200">
+                        <h3 class="font-bold text-primary text-base">五、吸引力与预期</h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">理想的约会方式</label>
+                            <input type="text" id="q-ideal_dates" placeholder="如：图书馆自习, 校园散步, 咖啡厅" class="w-full px-3 py-2 border rounded-xl bg-white">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-3 rounded-xl font-semibold text-sm shadow-md transition">保存全部问卷档案并同步云端</button>
                 </form>
             </div>
         </section>
 
-        <!-- 3. NOTICES & FEEDBACK TAB -->
-        <section id="tab-notices" class="tab-content hidden py-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Left: Official Announcements -->
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-2xl font-black text-slate-900"><i class="fa-solid fa-bullhorn text-rose-600 mr-2"></i> 平台官方公告</h2>
-                        <span class="text-xs font-semibold text-slate-500">TJDs Official Bulletins</span>
-                    </div>
-
-                    <div id="noticesListContainer" class="space-y-4">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-
-                <!-- Right: User Feedback & Reports -->
-                <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm h-fit">
-                    <h3 class="text-lg font-bold text-slate-900 mb-2"><i class="fa-solid fa-comment-dots text-rose-600 mr-2"></i> 意见反馈与举报</h3>
-                    <p class="text-xs text-slate-500 mb-6">我们重视每一位津门学子的声音，管理员将在24小时内核实处理。</p>
-
-                    <form onsubmit="submitFeedback(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">反馈类型</label>
-                            <select id="fb_type" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
-                                <option value="网站建议">网站建议</option>
-                                <option value="Bug反馈">Bug反馈</option>
-                                <option value="举报违规">举报违规行为</option>
-                                <option value="注销账号">注销账号申请</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">详细描述/账号信息</label>
-                            <textarea id="fb_content" rows="4" required placeholder="请详细描述您的建议、Bug复现步骤或举报说明..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm"></textarea>
-                        </div>
-                        <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition shadow-md">
-                            提交反馈
-                        </button>
-                    </form>
+        <!-- 4. 匹配揭晓页（分页展示每期结果） -->
+        <section id="view-reveal" class="hidden max-w-2xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr space-y-6 text-center">
+                <div class="w-16 h-16 bg-blue-50 text-primary rounded-full flex items-center justify-center mx-auto text-2xl font-bold">🎡</div>
+                <h2 class="font-bold text-2xl text-slate-800">本周与历届匹配揭晓专区</h2>
+                <p class="text-xs text-slate-500">每周六下午 12:30 准时进行智能双向配对。配对成功后将在此展示彼此的契合度原因与对方联系方式。</p>
+                <div id="reveal-result-container" class="p-4 bg-cream rounded-xl text-left space-y-2 border border-blue-100">
+                    <span class="text-xs font-bold text-primary block">当前匹配期数：第 25 期</span>
+                    <p class="text-xs text-slate-600">您已成功参与本周匹配！匹配结果将在每周六下午 12:30 准时揭晓。</p>
                 </div>
             </div>
         </section>
 
-        <!-- 4. ABOUT & PRIVACY TAB -->
-        <section id="tab-about" class="tab-content hidden py-12 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 sm:p-12 space-y-8">
-                <div>
-                    <span class="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-full uppercase tracking-wider">TJDs Philosophy</span>
-                    <h2 class="text-3xl font-black text-slate-900 mt-3 mb-4">关于津缘（TJDs / 百花争鸣）</h2>
-                    <p class="text-slate-600 leading-relaxed text-sm sm:text-base">
-                        “津缘”（Tianjin Date Society，简称 <b>TJDs</b>，别名：<b>百花争鸣</b>）是专为天津高校学子打造的高质量、严谨严肃的青年社交与盲盒交友平台。我们致力于打破高校间的信息壁垒，为天津大学、南开大学等顶尖学府学子搭建真诚、纯粹、安全的情感交流桥梁。
-                    </p>
-                </div>
-
-                <div class="border-t border-slate-100 pt-6">
-                    <h3 class="text-xl font-bold text-slate-900 mb-3"><i class="fa-solid fa-shield-halved text-rose-600 mr-2"></i> 天津试点高校名单</h3>
-                    <p class="text-xs text-slate-500 mb-4">目前平台首批开放认证与深度匹配的试点高校涵盖：</p>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <div class="p-3.5 bg-rose-50/60 border border-rose-100 rounded-2xl text-center text-sm font-bold text-rose-900">天津大学</div>
-                        <div class="p-3.5 bg-rose-50/60 border border-rose-100 rounded-2xl text-center text-sm font-bold text-rose-900">南开大学</div>
-                        <div class="p-3.5 bg-rose-50/60 border border-rose-100 rounded-2xl text-center text-sm font-bold text-rose-900">天津师范大学</div>
-                        <div class="p-3.5 bg-rose-50/60 border border-rose-100 rounded-2xl text-center text-sm font-bold text-rose-900">天津医科大学</div>
-                        <div class="p-3.5 bg-rose-50/60 border border-rose-100 rounded-2xl text-center text-sm font-bold text-rose-900">天津理工大学</div>
-                        <div class="p-3.5 bg-rose-50/60 border border-rose-100 rounded-2xl text-center text-sm font-bold text-rose-900">天津仁爱学院</div>
+        <!-- 5. 公告与反馈页（分页公告 + 4类反馈） -->
+        <section id="view-announcement-feedback" class="hidden max-w-4xl mx-auto p-6 space-y-8">
+            <!-- 公告模块 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr space-y-4">
+                <h2 class="font-bold text-xl text-primary border-b pb-3">系统公告</h2>
+                <div id="announcement-list" class="space-y-3">
+                    <div class="p-4 bg-slate-50 rounded-xl border">
+                        <div class="font-bold text-sm text-slate-800">系统维护更新公告 - 2026-09-13</div>
+                        <p class="text-xs text-slate-600 mt-1">全新津缘 TJDs 正式上线！全面升级建档问卷、后台配对管理与反馈通道，每周六下午 12:30 准时配对。</p>
+                        <span class="text-[10px] text-slate-400 mt-2 block">2026-09-13</span>
                     </div>
                 </div>
-
-                <div class="border-t border-slate-100 pt-6">
-                    <h3 class="text-xl font-bold text-slate-900 mb-3"><i class="fa-solid fa-lock text-rose-600 mr-2"></i> 信息安全与隐私保护声明</h3>
-                    <ul class="space-y-3 text-sm text-slate-600">
-                        <li class="flex items-start">
-                            <i class="fa-solid fa-circle-check text-rose-600 mt-1 mr-2.5"></i>
-                            <span><b>学生身份三重保障：</b> 支持高校edu邮箱验证与学生证人工审核双轨制，严防校外无关人员入驻，维护纯净校园交友生态。</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fa-solid fa-circle-check text-rose-600 mt-1 mr-2.5"></i>
-                            <span><b>数据加密存储：</b> 用户的五维档案、联系方式与敏感隐私严格遵循Supabase高标准行级安全（RLS）策略进行加密保存。</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fa-solid fa-circle-check text-rose-600 mt-1 mr-2.5"></i>
-                            <span><b>隐私绝不外泄：</b> 未经双向匹配确认，绝不公开展示您的任何联系方式。您可随时通过反馈板块申请一键彻底注销账号。</span>
-                        </li>
-                    </ul>
-                </div>
             </div>
-        </section>
-
-        <!-- 5. ADMIN TAB -->
-        <section id="tab-admin" class="tab-content hidden py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-                <div class="bg-slate-900 text-white px-8 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <!-- 反馈模块 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr space-y-4">
+                <h2 class="font-bold text-xl text-primary border-b pb-3">意见反馈与诉求提交</h2>
+                <form onsubmit="submitFeedback(event)" class="space-y-4 text-sm">
                     <div>
-                        <span class="text-xs font-bold text-rose-400 uppercase tracking-widest"><i class="fa-solid fa-shield-dog mr-1"></i> TJDs System Control</span>
-                        <h2 class="text-2xl font-black mt-1">管理员控制后台</h2>
+                        <label class="block text-xs font-semibold text-slate-600 mb-2">选择反馈类型</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <label class="flex items-center space-x-2 p-3 border rounded-xl cursor-pointer hover:bg-slate-50"><input type="radio" name="fb-category" value="网站建议" checked><span>网站建议</span></label>
+                            <label class="flex items-center space-x-2 p-3 border rounded-xl cursor-pointer hover:bg-slate-50"><input type="radio" name="fb-category" value="Bug反馈"><span>Bug反馈</span></label>
+                            <label class="flex items-center space-x-2 p-3 border rounded-xl cursor-pointer hover:bg-slate-50"><input type="radio" name="fb-category" value="举报"><span>举报</span></label>
+                            <label class="flex items-center space-x-2 p-3 border rounded-xl cursor-pointer hover:bg-slate-50"><input type="radio" name="fb-category" value="注销账号"><span>注销账号</span></label>
+                        </div>
                     </div>
-                    <div class="mt-4 sm:mt-0 flex space-x-2">
-                        <button onclick="switchAdminSubTab('students')" class="admin-sub-btn px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white transition" data-sub="students">学生与账号管理</button>
-                        <button onclick="switchAdminSubTab('wall')" class="admin-sub-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-sub="wall">配对墙编辑</button>
-                        <button onclick="switchAdminSubTab('notices')" class="admin-sub-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-sub="notices">公告与反馈管理</button>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">反馈详细内容或诉求</label>
+                        <textarea id="fb-content" rows="4" required placeholder="请详细描述您的建议、遇到的Bug或注销/举报原因..." class="w-full p-3 border rounded-xl text-xs"></textarea>
+                    </div>
+                    <button type="submit" class="bg-primary hover:bg-primaryHover text-white px-6 py-2.5 rounded-xl font-semibold text-xs shadow transition">提交反馈</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 6. 关于页面 -->
+        <section id="view-about" class="hidden max-w-3xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr space-y-4 text-sm leading-relaxed">
+                <h2 class="font-bold text-2xl text-primary">关于津缘 (TJDs)</h2>
+                <p><strong>津缘（Tianjin Date Society）</strong>是面向天津高校学生的校园匹配平台，我们相信：不是多遇见人，而是遇见更合适的人。</p>
+                <h3 class="font-bold text-base text-slate-800 pt-2">怎么玩</h3>
+                <p>完成一次问卷（基本信息、核心价值观与偏好），之后每周六下午 12:30 前可选择「本周参与」。我们会为参与的同学匹配一位对象，并给出契合度与简短原因。我们只提供联系方式，约会方式由你自己决定。</p>
+                <h3 class="font-bold text-base text-slate-800 pt-2">谁可以用</h3>
+                <p>仅限天津市高等院校在校学生使用。需提交天津高校邮箱或非高校邮箱和学生证明截图进行人工复核。</p>
+            </div>
+        </section>
+
+        <!-- 7. 严谨隐私页面 -->
+        <section id="view-privacy" class="hidden max-w-3xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-borderClr space-y-4 text-sm leading-relaxed">
+                <h2 class="font-bold text-2xl text-primary">隐私声明与安全保障</h2>
+                <p class="text-xs text-slate-400">最后更新：2026年9月</p>
+                <h3 class="font-bold text-slate-800">1. 高校学子专属保障</h3>
+                <p>本平台仅限天津市高等院校在校学生使用。需提交天津高校邮箱或非高校邮箱和学生证明截图进行人工复核。</p>
+                <h3 class="font-bold text-slate-800">2. 信息安全与隐私保护</h3>
+                <p>您的手机号、微信号、真名与证件图片仅用于管理员内部审核，绝不在前端公开展现，并通过安全加密云端存储。</p>
+                <h3 class="font-bold text-slate-800">3. 关于学校试点</h3>
+                <p>由于现在在试点阶段，暂时开放天津大学、南开大学、天津师范大学、天津医科大学、天津理工大学、天津仁爱学院。</p>
+            </div>
+        </section>
+
+        <!-- 8. 后台指挥中心 (管理员端) -->
+        <section id="view-admin" class="hidden max-w-7xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-borderClr space-y-6">
+                <div class="flex justify-between items-center border-b pb-4">
+                    <div>
+                        <h2 class="font-bold text-xl text-primary">后台管理与指挥中心</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">审核学生档案、管理管理员、公告发布、参与匹配控制与用户反馈答复</p>
+                    </div>
+                    <span class="text-xs bg-blue-100 text-primary px-3 py-1 rounded-full font-bold">超级管理员 (xyhh99@qq.com)</span>
+                </div>
+                <!-- 选项卡切换管理子模块 -->
+                <div class="flex space-x-4 border-b pb-3 text-xs font-semibold">
+                    <button onclick="switchAdminTab('users')" id="adm-tab-users" class="text-primary border-b-2 border-primary pb-1">学生与匹配权限管理</button>
+                    <button onclick="switchAdminTab('feedbacks')" id="adm-tab-feedbacks" class="text-slate-500 pb-1">用户反馈答复</button>
+                    <button onclick="switchAdminTab('admins')" id="adm-tab-admins" class="text-slate-500 pb-1">管理员团队设置</button>
+                    <button onclick="switchAdminTab('announcements')" id="adm-tab-announcements" class="text-slate-500 pb-1">公告发布管理</button>
+                </div>
+
+                <!-- 子板块1：学生与匹配权限管理 -->
+                <div id="adm-sec-users" class="space-y-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-700 uppercase">
+                                <tr>
+                                    <th class="p-3">邮箱 / 账号</th>
+                                    <th class="p-3">高校</th>
+                                    <th class="p-3">学生证明</th>
+                                    <th class="p-3">审核状态</th>
+                                    <th class="p-3">参与配对权限</th>
+                                    <th class="p-3 text-right">管理操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-table" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-slate-600">
+                        <span id="pagination-info">显示第 1 页</span>
+                        <div class="space-x-2">
+                            <button onclick="changePage(-1)" class="px-3 py-1 bg-slate-100 rounded">上一页</button>
+                            <button onclick="changePage(1)" class="px-3 py-1 bg-slate-100 rounded">下一页</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="p-8">
-                    <!-- Admin Subtab 1: Students & Accounts Management -->
-                    <div id="admin-sub-students" class="admin-sub-content space-y-6">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-bold text-slate-900">平台注册学子与账号权限管理</h3>
-                            <button onclick="openAdminAddUserModal()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition shadow">
-                                <i class="fa-solid fa-user-plus mr-1"></i> 增设管理员/用户
-                            </button>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="border-b border-slate-200 text-xs font-bold text-slate-500 uppercase">
-                                        <th class="py-3 px-4">用户邮箱/账号</th>
-                                        <th class="py-3 px-4">姓名/高校</th>
-                                        <th class="py-3 px-4">配对权限</th>
-                                        <th class="py-3 px-4">注册时间</th>
-                                        <th class="py-3 px-4 text-right">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="adminUsersTableBody" class="text-sm divide-y divide-slate-100">
-                                    <!-- Populated by JS -->
-                                </tbody>
-                            </table>
+                <!-- 子板块2：用户反馈答复 -->
+                <div id="adm-sec-feedbacks" class="hidden space-y-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-700 uppercase">
+                                <tr>
+                                    <th class="p-3">用户邮箱</th>
+                                    <th class="p-3">诉求类型</th>
+                                    <th class="p-3">详细内容</th>
+                                    <th class="p-3">管理员答复</th>
+                                    <th class="p-3 text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-feedback-table" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 子板块3：管理员账号管理 (仅Admin) -->
+                <div id="adm-sec-admins" class="hidden space-y-4">
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-3">
+                        <h3 class="font-bold text-sm text-slate-800">新增或赋予管理员权限</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <input type="email" id="new-admin-email" placeholder="管理员邮箱" class="px-3 py-2 border rounded-xl text-xs bg-white">
+                            <input type="password" id="new-admin-pwd" placeholder="设定密码" class="px-3 py-2 border rounded-xl text-xs bg-white">
+                            <button onclick="createNewAdmin()" class="bg-primary text-white px-4 py-2 rounded-xl text-xs font-semibold">创建/授权管理员</button>
                         </div>
                     </div>
+                    <div id="admin-list-container" class="space-y-2"></div>
+                </div>
 
-                    <!-- Admin Subtab 2: Success Wall Management -->
-                    <div id="admin-sub-wall" class="admin-sub-content space-y-6 hidden">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-bold text-slate-900">成功配对墙成果编辑与发布</h3>
-                            <button onclick="openAddWallModal()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition shadow">
-                                <i class="fa-solid fa-plus mr-1"></i> 发布新一期配对成果
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="adminWallGrid">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-
-                    <!-- Admin Subtab 3: Notices & Feedbacks -->
-                    <div id="admin-sub-notices" class="admin-sub-content space-y-6 hidden">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div>
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-bold text-slate-900">官方公告发布</h3>
-                                    <button onclick="openAddNoticeModal()" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-xl">发布公告</button>
-                                </div>
-                                <div id="adminNoticesList" class="space-y-3"></div>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-bold text-slate-900 mb-4">用户意见反馈与举报处理</h3>
-                                <div id="adminFeedbacksList" class="space-y-3"></div>
-                            </div>
-                        </div>
+                <!-- 子板块4：公告发布管理 -->
+                <div id="adm-sec-announcements" class="hidden space-y-4">
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-3">
+                        <h3 class="font-bold text-sm text-slate-800">发布新公告</h3>
+                        <input type="text" id="new-ann-title" placeholder="公告标题" class="w-full px-3 py-2 border rounded-xl text-xs bg-white">
+                        <textarea id="new-ann-content" placeholder="公告详细内容..." rows="3" class="w-full p-3 border rounded-xl text-xs bg-white"></textarea>
+                        <button onclick="publishAnnouncement()" class="bg-primary text-white px-5 py-2 rounded-xl text-xs font-semibold">发布公告</button>
                     </div>
                 </div>
             </div>
         </section>
-
     </main>
 
-    <!-- Auth Modal (Login / Register) -->
-    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl relative">
-            <button onclick="closeAuthModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl font-bold">
-                    <i class="fa-solid fa-shield-heart"></i>
-                </div>
-                <h3 id="authModalTitle" class="text-2xl font-black text-slate-900">登录津缘 TJDs</h3>
-                <p id="authModalSubtitle" class="text-xs text-slate-500 mt-1">天津高校学子专属交友通行证</p>
-            </div>
-
-            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">校园邮箱 / 账号</label>
-                    <input type="email" id="authEmail" required placeholder="例如：tju@tju.edu.cn 或管理员邮箱" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">登录密码</label>
-                    <input type="password" id="authPassword" required placeholder="请输入密码" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500">
-                </div>
-                <!-- Student card upload for register without edu email -->
-                <div id="studentCardUploadGroup" class="hidden space-y-2">
-                    <label class="block text-xs font-bold text-slate-700">无高校邮箱？请上传学生证/校园卡证明</label>
-                    <input type="file" id="authStudentCard" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100">
-                    <p class="text-[10px] text-slate-400">支持JPG/PNG，管理员将在24小时内人工审核学生身份。</p>
-                </div>
-                <button type="submit" id="authSubmitBtn" class="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-rose-600/20">
-                    立即登录
-                </button>
-            </form>
-
-            <div class="mt-6 text-center">
-                <p id="authSwitchPrompt" class="text-xs text-slate-500">
-                    还没有账号？ <button onclick="toggleAuthMode()" class="text-rose-600 font-bold hover:underline">立即注册高校账号</button>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add/Edit Wall Modal -->
-    <div id="wallModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
-        <div class="bg-white rounded-3xl p-8 max-w-lg w-full mx-4 shadow-2xl relative">
-            <button onclick="closeWallModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-xl font-bold text-slate-900 mb-4">编辑配对墙成果</h3>
-            <form onsubmit="saveWallItem(event)" class="space-y-4">
-                <input type="hidden" id="wall_id">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">期数标题</label>
-                    <input type="text" id="wall_title" required placeholder="例如：2026年第12期：海河之恋" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">牵线高校标签</label>
-                    <input type="text" id="wall_universities" required placeholder="例如：天津大学 & 南开大学" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">成功配对感言与故事摘要</label>
-                    <textarea id="wall_story" rows="4" required placeholder="记录学子在平台相识的故事..." class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm"></textarea>
-                </div>
-                <button type="submit" class="w-full py-3 bg-rose-600 text-white font-bold rounded-xl text-sm hover:bg-rose-700 transition">保存并发布</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Notice Modal -->
-    <div id="noticeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
-        <div class="bg-white rounded-3xl p-8 max-w-lg w-full mx-4 shadow-2xl relative">
-            <button onclick="closeNoticeModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-xl font-bold text-slate-900 mb-4">发布官方公告</h3>
-            <form onsubmit="saveNoticeItem(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">公告标题</label>
-                    <input type="text" id="notice_title" required class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">公告正文内容</label>
-                    <textarea id="notice_content" rows="4" required class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm"></textarea>
-                </div>
-                <button type="submit" class="w-full py-3 bg-rose-600 text-white font-bold rounded-xl text-sm hover:bg-rose-700 transition">发布公告</button>
-            </form>
-        </div>
-    </div>
-
+    <!-- 前端核心控制脚本 -->
     <script>
-        // --- SUPABASE & STATE CONFIGURATION ---
-        // Default Supabase Client placeholder. Replace with user credentials if needed.
-        const SUPABASE_URL = 'https://your-supabase-project.supabase.co';
-        const SUPABASE_ANON_KEY = 'your-supabase-anon-key';
-        let supabaseClient = null;
-
-        try {
-            if (typeof supabase !== 'undefined' && SUPABASE_URL.includes('http')) {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            }
-        } catch (e) {
-            console.log("Supabase initialization fallback to local mock mode.", e);
-        }
-
-        // App State
+        const supabaseUrl = 'https://owyidjofutkihavyuhki.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93eWlkam9mdXRraWhhdnl1aGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNTAxMDgsImV4cCI6MjEwNDgyNjEwOH0.1Wt1e8f1mKNJYMhKvZ-yI-u6eioQHyD8BCJvCWDb2R8';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
         let currentUser = null;
-        let isRegisterMode = false;
-        let currentAdminSub = 'students';
-        let successWallData = [
-            { id: 1, title: '第2603期：北洋与南开的学术双星', universities: '天津大学 & 南开大学', story: '两位硕博生在每周六下午的盲盒匹配中因共同的科研追求与对海河咖啡的热爱一见如故，现已幸福牵手。', date: '2026-03-07' },
-            { id: 2, title: '第2602期：师大与理工的春日邂逅', universities: '天津师范大学 & 天津理工大学', story: '通过TJDs五维问卷的默契测试，双方在生活颗粒度与作息上高度同频，在天大卫津路校区成功面基。', date: '2026-02-28' },
-            { id: 3, title: '第2601期：医大与仁爱的纯真校园情', universities: '天津医科大学 & 天津仁爱学院', story: '管理员人工审核与算法精准匹配双重护航，开启了一段彼此鼓励、共同备考的纯真校园恋爱。', date: '2026-02-21' }
-        ];
-        let noticesData = [
-            { id: 1, title: '关于2026年春季学期每周六下午12:30准时匹配的通知', content: '新学期伊始，请各位高校学子务必提前完善五维问卷档案。系统将于每周六中午12:30自动触发智能牵线。', date: '2026-03-10' },
-            { id: 2, title: '天津试点高校学子实名认证规范与隐私保障说明', content: 'TJDs严格保护每一位学子隐私，严禁任何非高校人员入驻。如发现虚假信息请及时通过反馈板块举报。', date: '2026-03-01' }
-        ];
-        let feedbacksData = [
-            { id: 1, type: '网站建议', content: '建议增加校区间距离筛选功能，更方便面基约会！', email: 'tju_student@tju.edu.cn', status: '已采纳', date: '2026-03-12' },
-            { id: 2, type: 'Bug反馈', content: '移动端问卷下拉菜单在部分旧版浏览器显示异常。', email: 'nankai@nankai.edu.cn', status: '已修复', date: '2026-03-09' }
-        ];
-        let registeredUsersData = [
-            { id: '1', email: 'xyhh99@qq.com', name: '系统超级管理员', university: '天津大学', canMatch: true, role: 'Admin', date: '2026-01-01' },
-            { id: '2', email: 'tju_alice@tju.edu.cn', name: '张同学', university: '天津大学', canMatch: true, role: 'Student', date: '2026-03-05' },
-            { id: '3', email: 'nankai_bob@nankai.edu.cn', name: '李同学', university: '南开大学', canMatch: true, role: 'Student', date: '2026-03-08' }
-        ];
+        let adminCurrentPage = 1;
+        const adminPageSize = 5;
 
-        // --- UI & TAB MANAGEMENT ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('TJDs_current_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainApp();
+            } else {
+                showAuthView();
+            }
+            startCountdown();
+            loadHistoryMatchPagination();
+        });
 
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-rose-600', 'bg-rose-50');
-                if(btn.dataset.target === tabId) {
-                    btn.classList.add('text-rose-600', 'bg-rose-50');
-                }
+        function showAuthView() {
+            document.getElementById('view-auth').classList.remove('hidden');
+            document.getElementById('navbar').classList.add('hidden');
+            hideAllTabs();
+        }
+
+        function showMainApp() {
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('navbar').classList.remove('hidden');
+            document.getElementById('user-display-name').innerText = currentUser.nickname || currentUser.email;
+            
+            const isAdmin = currentUser.email === 'Admin' || currentUser.email === 'xyhh99@qq.com';
+            const navContainer = document.getElementById('nav-menu-container');
+            if (isAdmin) {
+                document.getElementById('system-mode-tag').innerText = '后台管理指挥中心';
+                navContainer.innerHTML = `
+                    <button onclick="switchTab('admin')" id="nav-admin" class="text-primary font-semibold">后台指挥中心</button>
+                `;
+                switchTab('admin');
+            } else {
+                document.getElementById('system-mode-tag').innerText = '学生端系统';
+                navContainer.innerHTML = `
+                    <button onclick="switchTab('home')" id="nav-home" class="text-primary font-semibold hover:text-primary">首页概览</button>
+                    <button onclick="switchTab('questionnaire')" id="nav-questionnaire" class="text-slate-600 hover:text-primary">建档问卷</button>
+                    <button onclick="switchTab('reveal')" id="nav-reveal" class="text-slate-600 hover:text-primary">匹配揭晓</button>
+                    <button onclick="switchTab('announcement-feedback')" id="nav-announcement-feedback" class="text-slate-600 hover:text-primary">公告与反馈</button>
+                    <button onclick="switchTab('about')" id="nav-about" class="text-slate-600 hover:text-primary">关于</button>
+                    <button onclick="switchTab('privacy')" id="nav-privacy" class="text-slate-600 hover:text-primary">隐私</button>
+                `;
+                switchTab('home');
+            }
+        }
+
+        function hideAllTabs() {
+            ['view-home', 'view-questionnaire', 'view-reveal', 'view-announcement-feedback', 'view-about', 'view-privacy', 'view-admin'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
             });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function switchAdminSubTab(subId) {
-            currentAdminSub = subId;
-            document.querySelectorAll('.admin-sub-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`admin-sub-${subId}`).classList.remove('hidden');
-
-            document.querySelectorAll('.admin-sub-btn').forEach(btn => {
-                btn.classList.remove('bg-rose-600', 'text-white');
-                btn.classList.add('bg-slate-800', 'text-slate-300');
-                if(btn.dataset.sub === subId) {
-                    btn.classList.remove('bg-slate-800', 'text-slate-300');
-                    btn.classList.add('bg-rose-600', 'text-white');
-                }
+        function switchTab(tabName) {
+            hideAllTabs();
+            ['home', 'questionnaire', 'reveal', 'announcement-feedback', 'about', 'privacy', 'admin'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                if(btn) btn.className = t === tabName ? "text-primary font-semibold" : "text-slate-600 hover:text-primary";
             });
+            if (tabName === 'home') document.getElementById('view-home').classList.remove('hidden');
+            else if (tabName === 'questionnaire') { document.getElementById('view-questionnaire').classList.remove('hidden'); loadQuestionnaireData(); }
+            else if (tabName === 'reveal') document.getElementById('view-reveal').classList.remove('hidden');
+            else if (tabName === 'announcement-feedback') document.getElementById('view-announcement-feedback').classList.remove('hidden');
+            else if (tabName === 'about') document.getElementById('view-about').classList.remove('hidden');
+            else if (tabName === 'privacy') document.getElementById('view-privacy').classList.remove('hidden');
+            else if (tabName === 'admin') { document.getElementById('view-admin').classList.remove('hidden'); loadAdminData(); }
         }
 
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
+        function switchAuthMode(mode) {
+            ['login', 'register', 'forgot'].forEach(m => {
+                document.getElementById(`form-${m}`).classList.add('hidden');
+                document.getElementById(`tab-${m}`).className = "flex-1 pb-2 text-center text-slate-400 border-b-2 border-transparent";
+            });
+            document.getElementById(`form-${mode}`).classList.remove('hidden');
+            document.getElementById(`tab-${mode}`).className = "flex-1 pb-2 text-center border-b-2 border-primary text-primary font-semibold";
         }
 
-        // Custom Modal Controller
-        function showModal(title, message, iconClass = "fa-heart") {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalMessage').innerText = message;
-            document.getElementById('modalIcon').className = `fa-solid ${iconClass}`;
-            document.getElementById('customModal').classList.remove('hidden');
+        function switchPublicTab(tab) {
+            const modal = document.getElementById('public-modal');
+            const content = document.getElementById('public-modal-content');
+            modal.classList.remove('hidden');
+            if (tab === 'announcement') {
+                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">系统公告</h2><div class="p-4 bg-slate-50 rounded-xl"><div class="font-bold text-sm">系统维护更新公告 - 2026-09-13</div><p class="text-xs text-slate-600 mt-1">津缘 TJDs 正式上线！每周六下午 12:30 准时配对。</p></div>`;
+            } else if (tab === 'about') {
+                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">关于津缘</h2><p class="text-sm">津缘是面向天津高校学生的校园匹配平台，每周六下午 12:30 定时进行智能双向配对。</p>`;
+            } else if (tab === 'privacy') {
+                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">隐私说明</h2><p class="text-sm">1. 高校学子专属保障：本平台仅限天津市高等院校在校学生使用。需提交天津高校邮箱或非高校邮箱和学生证明截图进行人工复核。<br>2. 信息安全与隐私保护：您的手机号、微信号、真名与证件图片仅用于管理员内部审核，绝不在前端公开展现。<br>3. 试点高校：天津大学、南开大学、天津师范大学、天津医科大学、天津理工大学、天津仁爱学院。</p>`;
+            }
         }
-        function closeModal() {
-            document.getElementById('customModal').classList.add('hidden');
-        }
+        function closePublicModal() { document.getElementById('public-modal').classList.add('hidden'); }
 
-        // --- COUNTDOWN TIMER (Every Saturday 12:30 PM) ---
-        function initCountdown() {
-            function updateTimer() {
+        // 实时倒计时计算（每周六下午 12:30）
+        function startCountdown() {
+            setInterval(() => {
                 const now = new Date();
-                // Find next Saturday 12:30 PM
-                const resultDate = new Date();
-                resultDate.setDate(now.getDate() + ((6 + 7 - now.getDay()) % 7));
-                resultDate.setHours(12, 30, 0, 0);
-
-                if (now > resultDate) {
-                    resultDate.setDate(resultDate.getDate() + 7);
+                // 计算本周六 12:30
+                const target = new Date();
+                const day = target.getDay();
+                const diff = (6 - day + 7) % 7;
+                target.setDate(target.getDate() + diff);
+                target.setHours(12, 30, 0, 0);
+                if (now > target) {
+                    target.setDate(target.getDate() + 7);
                 }
-
-                const diff = resultDate - now;
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const mins = Math.floor((diff / 1000 / 60) % 60);
-                const secs = Math.floor((diff / 1000) % 60);
-
-                document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
-                document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
-                document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
-                document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
-            }
-            updateTimer();
-            setInterval(updateTimer, 1000);
+                const distance = target - now;
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                const timerEl = document.getElementById('countdown-timer');
+                if (timerEl) {
+                    timerEl.innerText = `${days}天 ${hours}小时 ${minutes}分 ${seconds}秒`;
+                }
+            }, 1000);
         }
 
-        // --- SUCCESS WALL RENDERER ---
-        function renderSuccessWall() {
-            const grid = document.getElementById('successWallGrid');
-            grid.innerHTML = successWallData.map(item => `
-                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-full"><i class="fa-solid fa-graduation-cap mr-1"></i> ${item.universities}</span>
-                            <span class="text-[11px] text-slate-400 font-medium">${item.date}</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900 mb-2">${item.title}</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">${item.story}</p>
-                    </div>
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-rose-600 font-semibold">
-                        <span><i class="fa-solid fa-heart text-rose-500 mr-1"></i> 牵线成功</span>
-                        <span>TJDs Verified</span>
-                    </div>
+        // 加载历届匹配成功数据分页小模块
+        function loadHistoryMatchPagination() {
+            const grid = document.getElementById('history-match-pagination-grid');
+            if (!grid) return;
+            const historyData = [
+                { period: '第1期', count: '118人' }, { period: '第2期', count: '140人' },
+                { period: '第3期', count: '392人' }, { period: '第4期', count: '548人' },
+                { period: '第5期', count: '580人' }, { period: '第6期', count: '576人' },
+                { period: '第7期', count: '546人' }, { period: '第8期', count: '510人' },
+                { period: '第9期', count: '492人' }, { period: '第10期', count: '480人' },
+                { period: '第24期', count: '374人' }, { period: '第25期', count: '364人' }
+            ];
+            grid.innerHTML = historyData.map(item => `
+                <div class="p-3 bg-slate-50 border rounded-xl text-center">
+                    <span class="font-bold text-primary block">${item.period}</span>
+                    <span class="text-slate-600 mt-1 block">成功配对：${item.count}</span>
                 </div>
             `).join('');
-
-            // Admin Wall Grid
-            const adminGrid = document.getElementById('adminWallGrid');
-            if(adminGrid) {
-                adminGrid.innerHTML = successWallData.map(item => `
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col justify-between">
-                        <div>
-                            <p class="text-xs font-bold text-rose-600 mb-1">${item.universities}</p>
-                            <h4 class="font-bold text-slate-900 text-sm mb-1">${item.title}</h4>
-                            <p class="text-xs text-slate-600">${item.story}</p>
-                        </div>
-                        <div class="mt-4 flex justify-end space-x-2">
-                            <button onclick="editWallItem(${item.id})" class="px-3 py-1.5 bg-slate-200 text-slate-700 text-xs rounded-xl font-bold">编辑</button>
-                            <button onclick="deleteWallItem(${item.id})" class="px-3 py-1.5 bg-rose-100 text-rose-700 text-xs rounded-xl font-bold">删除</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
         }
 
-        // --- NOTICES & FEEDBACK RENDERER ---
-        function renderNotices() {
-            const container = document.getElementById('noticesListContainer');
-            container.innerHTML = noticesData.map(n => `
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <div class="flex items-center justify-between mb-2">
-                        <h3 class="font-bold text-slate-900 text-base">${n.title}</h3>
-                        <span class="text-xs text-slate-400">${n.date}</span>
-                    </div>
-                    <p class="text-xs text-slate-600 leading-relaxed">${n.content}</p>
-                </div>
-            `).join('');
-
-            // Admin notices & feedbacks
-            const adminNotices = document.getElementById('adminNoticesList');
-            if(adminNotices) {
-                adminNotices.innerHTML = noticesData.map(n => `
-                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
-                        <div><p class="font-bold">${n.title}</p><span class="text-slate-400">${n.date}</span></div>
-                        <button onclick="deleteNotice(${n.id})" class="text-rose-600 font-bold px-2 py-1">删除</button>
-                    </div>
-                `).join('');
-            }
-
-            const adminFeedbacks = document.getElementById('adminFeedbacksList');
-            if(adminFeedbacks) {
-                adminFeedbacks.innerHTML = feedbacksData.map(f => `
-                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
-                        <div class="flex justify-between font-bold text-slate-900">
-                            <span>[${f.type}] ${f.email}</span>
-                            <span class="text-rose-600">${f.status}</span>
-                        </div>
-                        <p class="text-slate-600">${f.content}</p>
-                    </div>
-                `).join('');
-            }
+        async function sendRealEmailCode() {
+            const email = document.getElementById('reg-email').value.trim();
+            if (!email) { alert('请先输入电子邮箱'); return; }
+            const btn = document.getElementById('btn-send-code');
+            btn.innerText = '发送中...';
+            btn.disabled = true;
+            try {
+                const { error } = await _supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+                if (error) alert('验证码发送失败: ' + error.message);
+                else alert(`6位数字验证码已成功发送至 ${email}，请查收邮件。`);
+            } catch (err) { alert('异常: ' + err.message); }
+            finally { btn.innerText = '发送验证码'; btn.disabled = false; }
         }
 
-        // --- AUTHENTICATION LOGIC ---
-        function openAuthModal(mode) {
-            isRegisterMode = (mode === 'register');
-            document.getElementById('authModalTitle').innerText = isRegisterMode ? '注册津缘 TJDs 账号' : '登录津缘 TJDs';
-            document.getElementById('authSubmitBtn').innerText = isRegisterMode ? '立即注册高校账号' : '立即登录';
-            document.getElementById('authSwitchPrompt').innerHTML = isRegisterMode ?
-                '已有账号？ <button onclick="openAuthModal(\'login\')" class="text-rose-600 font-bold hover:underline">立即登录</button>' :
-                '还没有账号？ <button onclick="openAuthModal(\'register\')" class="text-rose-600 font-bold hover:underline">立即注册高校账号</button>';
-
-            const cardGroup = document.getElementById('studentCardUploadGroup');
-            if(isRegisterMode) {
-                cardGroup.classList.remove('hidden');
-            } else {
-                cardGroup.classList.add('hidden');
-            }
-            document.getElementById('authModal').classList.remove('hidden');
-        }
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.add('hidden');
-        }
-        function toggleAuthMode() {
-            openAuthModal(isRegisterMode ? 'login' : 'register');
+        async function sendForgotCode() {
+            const email = document.getElementById('forgot-email').value.trim();
+            if (!email) { alert('请先输入账号邮箱'); return; }
+            const { error } = await _supabase.auth.signInWithOtp({ email });
+            if (error) alert('发送失败: ' + error.message); else alert(`重置验证码已发送至 ${email}`);
         }
 
-        function handleAuthSubmit(event) {
+        async function uploadStudentCard(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const fileName = `card_${Date.now()}_${file.name}`;
+            const { error } = await _supabase.storage.from('TJDs-uploads').upload(fileName, file);
+            if (error) { alert('上传失败: ' + error.message); return; }
+            const { data: pubData } = _supabase.storage.from('TJDs-uploads').getPublicUrl(fileName);
+            document.getElementById('reg-card-url').value = pubData.publicUrl;
+            document.getElementById('upload-status').innerText = '✔ 学生证明材料上传成功！';
+        }
+
+        async function handleRegister(event) {
             event.preventDefault();
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-
-            // Admin default login check (xyhh99@qq.com / TJDs@260913)
-            if (email === 'xyhh99@qq.com' && password === 'TJDs@260913') {
-                currentUser = { email: email, name: '超级管理员', role: 'Admin', university: '天津大学' };
-            } else {
-                // Find or create mock user
-                let found = registeredUsersData.find(u => u.email === email);
-                if (!found && isRegisterMode) {
-                    found = { id: String(Date.now()), email: email, name: email.split('@')[0], university: '天津大学', canMatch: true, role: 'Student', date: new Date().toISOString().split('T')[0] };
-                    registeredUsersData.push(found);
-                }
-                if (!found) {
-                    showModal('登录失败', '未找到该高校账号，请先注册或确认邮箱。', 'fa-triangle-exclamation');
-                    return;
-                }
-                currentUser = found;
-            }
-
-            updateAuthUI();
-            closeAuthModal();
-            showModal('登录成功', `欢迎回来，${currentUser.name}！已成功接入津缘（TJDs）平台。`, 'fa-circle-check');
-        }
-
-        function logoutUser() {
-            currentUser = null;
-            updateAuthUI();
-            switchTab('home');
-            showModal('已退出登录', '您已安全退出津缘（TJDs）平台。', 'fa-info');
-        }
-
-        function updateAuthUI() {
-            const authWidget = document.getElementById('authWidget');
-            const profileWidget = document.getElementById('userProfileWidget');
-            const adminContainer = document.getElementById('adminNavContainer');
-            const mobileAdminContainer = document.getElementById('mobileAdminContainer');
-
-            if (currentUser) {
-                authWidget.classList.add('hidden');
-                profileWidget.classList.remove('hidden');
-                document.getElementById('userNameDisplay').innerText = currentUser.name;
-                document.getElementById('userRoleDisplay').innerText = currentUser.role === 'Admin' ? '系统管理员' : currentUser.university;
-                document.getElementById('userAvatarText').innerText = currentUser.name.charAt(0).toUpperCase();
-
-                if (currentUser.role === 'Admin') {
-                    adminContainer.classList.remove('hidden');
-                    mobileAdminContainer.classList.remove('hidden');
-                    renderAdminUsers();
-                } else {
-                    adminContainer.classList.add('hidden');
-                    mobileAdminContainer.classList.add('hidden');
-                }
-            } else {
-                authWidget.classList.remove('hidden');
-                profileWidget.classList.add('hidden');
-                adminContainer.classList.add('hidden');
-                mobileAdminContainer.classList.add('hidden');
+            const email = document.getElementById('reg-email').value.trim();
+            const code = document.getElementById('reg-code').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const school = document.getElementById('reg-school').value;
+            const proof_image_url = document.getElementById('reg-card-url').value;
+            const { error: authError } = await _supabase.auth.verifyOtp({ email, token: code, type: 'email' });
+            if (authError) { alert('验证码错误或已失效: ' + authError.message); return; }
+            await _supabase.auth.updateUser({ password });
+            const { data, error } = await _supabase.from('tj_users').insert([{
+                email, school, proof_image_url, nickname: email.split('@')[0], verify_status: 'pending', is_verified: false
+            }]).select();
+            if (error) alert('注册档案写入失败: ' + error.message);
+            else {
+                alert('注册成功！请等待管理员人工审核。');
+                currentUser = data[0];
+                localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
+                showMainApp();
             }
         }
 
-        // --- QUESTIONNAIRE SUBMISSION ---
-        function submitQuestionnaire(event) {
+        async function handleLogin(event) {
             event.preventDefault();
-            if (!currentUser) {
-                showModal('请先登录', '提交问卷建档前，请先登录您的天津高校学子账号。', 'fa-triangle-exclamation');
-                openAuthModal('login');
+            const inputEmail = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            // 超级管理员直接登录校验
+            if ((inputEmail === 'Admin' || inputEmail === 'xyhh99@qq.com') && password === 'TJDs@260913') {
+                currentUser = { id: 'admin_root_id', email: 'xyhh99@qq.com', nickname: '超级管理员', verify_status: 'approved' };
+                localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
+                showMainApp();
                 return;
             }
-
-            const formData = {
-                name: document.getElementById('q_name').value,
-                university: document.getElementById('q_university').value,
-                grade: document.getElementById('q_grade').value,
-                location: document.getElementById('q_location').value,
-                career_plan: document.getElementById('q_career_plan').value,
-                core_value: document.getElementById('q_core_value').value,
-                schedule: document.getElementById('q_schedule').value,
-                consumption: document.getElementById('q_consumption').value,
-                conflict_style: document.getElementById('q_conflict_style').value,
-                company_freq: document.getElementById('q_company_freq').value,
-                admiration: document.getElementById('q_admiration').value,
-                expectation: document.getElementById('q_expectation').value,
-                userEmail: currentUser.email
-            };
-
-            console.log("Submitting questionnaire to Supabase:", formData);
-            showModal('建档成功！', '您的五维档案已成功录入津缘（TJDs）云端。每周六下午 12:30 算法将为您自动匹配优质校园缘分。', 'fa-heart');
-            switchTab('home');
-        }
-
-        // --- FEEDBACK & NOTICES SUBMISSION ---
-        function submitFeedback(event) {
-            event.preventDefault();
-            const type = document.getElementById('fb_type').value;
-            const content = document.getElementById('fb_content').value;
-
-            feedbacksData.unshift({
-                id: Date.now(),
-                type: type,
-                content: content,
-                email: currentUser ? currentUser.email : '匿名学子',
-                status: '待处理',
-                date: new Date().toISOString().split('T')[0]
-            });
-
-            document.getElementById('fb_content').value = '';
-            renderNotices();
-            showModal('提交成功', '感谢您的宝贵反馈，管理员将在24小时内核实处理。', 'fa-circle-check');
-        }
-
-        // --- ADMIN FUNCTIONS ---
-        function renderAdminUsers() {
-            const tbody = document.getElementById('adminUsersTableBody');
-            tbody.innerHTML = registeredUsersData.map(u => `
-                <tr class="hover:bg-slate-50">
-                    <td class="py-3 px-4 font-bold text-slate-900">${u.email}</td>
-                    <td class="py-3 px-4 text-slate-600">${u.name} / <span class="text-rose-600">${u.university}</span></td>
-                    <td class="py-3 px-4">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold ${u.canMatch ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                            ${u.canMatch ? '允许匹配' : '禁止匹配'}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4 text-slate-400 text-xs">${u.date}</td>
-                    <td class="py-3 px-4 text-right space-x-2">
-                        <button onclick="toggleUserMatch('${u.id}')" class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-200">切换权限</button>
-                        <button onclick="deleteUserAccount('${u.id}')" class="px-2.5 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-bold hover:bg-rose-200">删除</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function toggleUserMatch(id) {
-            const user = registeredUsersData.find(u => u.id === id);
-            if(user) {
-                user.canMatch = !user.canMatch;
-                renderAdminUsers();
-                showModal('权限更新', `已成功更新 ${user.email} 的配对权限状态。`, 'fa-circle-check');
-            }
-        }
-
-        function deleteUserAccount(id) {
-            registeredUsersData = registeredUsersData.filter(u => u.id !== id);
-            renderAdminUsers();
-            showModal('账号已删除', '所选学生/管理员账号已从云端移除。', 'fa-trash');
-        }
-
-        function openAdminAddUserModal() {
-            const email = prompt("请输入新增管理员或学子账号邮箱：");
-            if(email) {
-                const name = prompt("请输入姓名或昵称：", "新用户");
-                registeredUsersData.push({ id: String(Date.now()), email: email, name: name || '新用户', university: '天津大学', canMatch: true, role: 'Student', date: new Date().toISOString().split('T')[0] });
-                renderAdminUsers();
-                showModal('添加成功', '已成功增设账号。', 'fa-circle-check');
-            }
-        }
-
-        function openAddWallModal() {
-            document.getElementById('wall_id').value = '';
-            document.getElementById('wall_title').value = '';
-            document.getElementById('wall_universities').value = '';
-            document.getElementById('wall_story').value = '';
-            document.getElementById('wallModal').classList.remove('hidden');
-        }
-        function closeWallModal() {
-            document.getElementById('wallModal').classList.add('hidden');
-        }
-        function saveWallItem(event) {
-            event.preventDefault();
-            const id = document.getElementById('wall_id').value;
-            const title = document.getElementById('wall_title').value;
-            const universities = document.getElementById('wall_universities').value;
-            const story = document.getElementById('wall_story').value;
-
-            if(id) {
-                const item = successWallData.find(w => w.id == id);
-                if(item) { item.title = title; item.universities = universities; item.story = story; }
+            const { error: authError } = await _supabase.auth.signInWithPassword({ email: inputEmail, password });
+            if (authError) { alert('登录失败：账号或密码错误。'); return; }
+            const { data } = await _supabase.from('tj_users').select('*').eq('email', inputEmail).limit(1);
+            if (!data || data.length === 0) {
+                const { data: newData } = await _supabase.from('tj_users').insert([{ email: inputEmail, nickname: inputEmail.split('@')[0] }]).select();
+                currentUser = newData[0];
             } else {
-                successWallData.unshift({ id: Date.now(), title, universities, story, date: new Date().toISOString().split('T')[0] });
+                currentUser = data[0];
             }
-            closeWallModal();
-            renderSuccessWall();
-            showModal('保存成功', '成功配对墙成果已更新。', 'fa-circle-check');
-        }
-        function editWallItem(id) {
-            const item = successWallData.find(w => w.id === id);
-            if(item) {
-                document.getElementById('wall_id').value = item.id;
-                document.getElementById('wall_title').value = item.title;
-                document.getElementById('wall_universities').value = item.universities;
-                document.getElementById('wall_story').value = item.story;
-                document.getElementById('wallModal').classList.remove('hidden');
-            }
-        }
-        function deleteWallItem(id) {
-            successWallData = successWallData.filter(w => w.id !== id);
-            renderSuccessWall();
-            showModal('删除成功', '配对成果记录已移除。', 'fa-trash');
+            localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
+            showMainApp();
         }
 
-        function openAddNoticeModal() {
-            document.getElementById('noticeModal').classList.remove('hidden');
-        }
-        function closeNoticeModal() {
-            document.getElementById('noticeModal').classList.add('hidden');
-        }
-        function saveNoticeItem(event) {
+        async function handleForgot(event) {
             event.preventDefault();
-            const title = document.getElementById('notice_title').value;
-            const content = document.getElementById('notice_content').value;
-            noticesData.unshift({ id: Date.now(), title, content, date: new Date().toISOString().split('T')[0] });
-            closeNoticeModal();
-            renderNotices();
-            showModal('发布成功', '官方公告已成功发布。', 'fa-circle-check');
-        }
-        function deleteNotice(id) {
-            noticesData = noticesData.filter(n => n.id !== id);
-            renderNotices();
-            showModal('删除成功', '公告已移除。', 'fa-trash');
+            const email = document.getElementById('forgot-email').value.trim();
+            const code = document.getElementById('forgot-code').value.trim();
+            const newPassword = document.getElementById('forgot-new-password').value;
+            const { error: vError } = await _supabase.auth.verifyOtp({ email, token: code, type: 'recovery' });
+            if (vError) { alert('验证码错误: ' + vError.message); return; }
+            const { error } = await _supabase.auth.updateUser({ password: newPassword });
+            if (error) alert('重置失败: ' + error.message); else { alert('密码重置成功，请重新登录'); switchAuthMode('login'); }
         }
 
-        // --- INITIALIZATION ---
-        window.onload = function() {
-            initCountdown();
-            renderSuccessWall();
-            renderNotices();
-            updateAuthUI();
-        };
+        function logout() {
+            localStorage.removeItem('TJDs_current_user');
+            currentUser = null;
+            showAuthView();
+        }
+
+        async function loadQuestionnaireData() {
+            const { data } = await _supabase.from('tj_questionnaires').select('*').eq('user_id', currentUser.id).limit(1);
+            if (data && data.length > 0) {
+                const q = data[0];
+                document.getElementById('q-real_name').value = q.real_name || '';
+                document.getElementById('q-nickname').value = q.nickname || '';
+                document.getElementById('q-gender').value = q.gender || '男';
+                document.getElementById('q-match_gender_pref').value = q.match_gender_pref || '异性';
+                document.getElementById('q-intent').value = q.intent || '';
+                document.getElementById('q-grade').value = q.grade || '';
+                document.getElementById('q-hometown').value = q.hometown || '';
+                document.getElementById('q-height').value = q.height || '';
+                document.getElementById('q-contact_info').value = q.contact_info || '';
+                document.getElementById('q-ideal_dates').value = q.ideal_dates ? q.ideal_dates.join(',') : '';
+            }
+        }
+
+        async function saveQuestionnaire(event) {
+            event.preventDefault();
+            const payload = {
+                user_id: currentUser.id,
+                real_name: document.getElementById('q-real_name').value,
+                nickname: document.getElementById('q-nickname').value,
+                gender: document.getElementById('q-gender').value,
+                match_gender_pref: document.getElementById('q-match_gender_pref').value,
+                intent: document.getElementById('q-intent').value,
+                grade: document.getElementById('q-grade').value,
+                hometown: document.getElementById('q-hometown').value,
+                height: parseInt(document.getElementById('q-height').value) || 0,
+                contact_info: document.getElementById('q-contact_info').value,
+                ideal_dates: document.getElementById('q-ideal_dates').value.split(',').map(s=>s.trim()),
+                updated_at: new Date()
+            };
+            const { error } = await _supabase.from('tj_questionnaires').upsert(payload, { onConflict: 'user_id' });
+            if (error) alert('保存失败: ' + error.message);
+            else {
+                document.getElementById('questionnaire-save-tip').innerText = '✔ 建档问卷已成功保存至云端！';
+                setTimeout(() => document.getElementById('questionnaire-save-tip').innerText = '', 3000);
+            }
+        }
+
+        async function submitFeedback(event) {
+            event.preventDefault();
+            const category = document.querySelector('input[name="fb-category"]:checked').value;
+            const content = document.getElementById('fb-content').value;
+            const { error } = await _supabase.from('tj_announcements_feedbacks').insert([{
+                type: 'feedback', category, email: currentUser.email, content
+            }]);
+            if (error) alert('提交失败: ' + error.message);
+            else { alert('反馈已成功提交给管理员，感谢您的支持！'); document.getElementById('fb-content').value = ''; }
+        }
+
+        function switchAdminTab(sec) {
+            ['users', 'feedbacks', 'admins', 'announcements'].forEach(s => {
+                document.getElementById(`adm-sec-${s}`).classList.add('hidden');
+                document.getElementById(`adm-tab-${s}`).className = "text-slate-500 pb-1";
+            });
+            document.getElementById(`adm-sec-${sec}`).classList.remove('hidden');
+            document.getElementById(`adm-tab-${sec}`).className = "text-primary border-b-2 border-primary pb-1";
+            if (sec === 'feedbacks') loadAdminFeedbacks();
+            else if (sec === 'admins') loadAdminList();
+        }
+
+        async function loadAdminData() {
+            const { data } = await _supabase.from('tj_users').select('*').order('created_at', { ascending: false });
+            const tbody = document.getElementById('admin-user-table');
+            tbody.innerHTML = '';
+            if (data) {
+                const totalPages = Math.ceil(data.length / adminPageSize) || 1;
+                if (adminCurrentPage > totalPages) adminCurrentPage = totalPages;
+                const startIndex = (adminCurrentPage - 1) * adminPageSize;
+                const paginatedData = data.slice(startIndex, startIndex + adminPageSize);
+                document.getElementById('pagination-info').innerText = `显示第 ${adminCurrentPage} 页，共 ${totalPages} 页（总计 ${data.length} 账号）`;
+                paginatedData.forEach(u => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3 font-medium">${u.email}</td>
+                            <td class="p-3">${u.school || '-'}</td>
+                            <td class="p-3">${u.proof_image_url ? `<a href="${u.proof_image_url}" target="_blank" class="text-primary underline">查看证明</a>` : '无'}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${u.verify_status==='approved'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">${u.verify_status}</span></td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">允许参加配对</span></td>
+                            <td class="p-3 text-right space-x-1">
+                                <button onclick="updateUserStatus('${u.id}', 'approved')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[11px]">通过</button>
+                                <button onclick="updateUserStatus('${u.id}', 'rejected')" class="bg-amber-600 text-white px-2 py-1 rounded text-[11px]">驳回</button>
+                                <button onclick="deleteUserAccount('${u.id}')" class="bg-rose-600 text-white px-2 py-1 rounded text-[11px]">删除</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        async function loadAdminFeedbacks() {
+            const { data } = await _supabase.from('tj_announcements_feedbacks').select('*').eq('type', 'feedback').order('created_at', { ascending: false });
+            const tbody = document.getElementById('admin-feedback-table');
+            tbody.innerHTML = '';
+            if (data) {
+                data.forEach(f => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="p-3 font-medium">${f.email}</td>
+                            <td class="p-3"><span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px]">${f.category}</span></td>
+                            <td class="p-3">${f.content}</td>
+                            <td class="p-3">${f.admin_reply || '暂无答复'}</td>
+                            <td class="p-3 text-right">
+                                <button onclick="replyFeedback('${f.id}')" class="bg-primary text-white px-2 py-1 rounded text-[11px]">答复</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        async function replyFeedback(id) {
+            const reply = prompt('请输入对该用户反馈的答复内容：');
+            if (!reply) return;
+            const { error } = await _supabase.from('tj_announcements_feedbacks').update({ admin_reply: reply }).eq('id', id);
+            if (error) alert('答复失败'); else { alert('答复成功'); loadAdminFeedbacks(); }
+        }
+
+        async function loadAdminList() {
+            const { data } = await _supabase.from('tj_admins').select('*');
+            const container = document.getElementById('admin-list-container');
+            container.innerHTML = '<div class="text-xs font-bold text-slate-700 mb-2">现有管理员列表：</div>';
+            if (data && data.length > 0) {
+                data.forEach(a => {
+                    container.innerHTML += `<div class="p-3 bg-white border rounded-xl flex justify-between items-center text-xs"><span>${a.email} (${a.role})</span></div>`;
+                });
+            } else {
+                container.innerHTML += `<div class="text-xs text-slate-500">当前主管理员：xyhh99@qq.com (超级管理员)</div>`;
+            }
+        }
+
+        async function createNewAdmin() {
+            const email = document.getElementById('new-admin-email').value.trim();
+            const password = document.getElementById('new-admin-pwd').value.trim();
+            if (!email || !password) { alert('请完整填写管理员邮箱与密码'); return; }
+            const { error } = await _supabase.from('tj_admins').insert([{ email, password, role: 'sub_admin' }]);
+            if (error) alert('创建失败: ' + error.message); else { alert('新管理员创建成功！'); loadAdminList(); }
+        }
+
+        async function publishAnnouncement() {
+            const title = document.getElementById('new-ann-title').value.trim();
+            const content = document.getElementById('new-ann-content').value.trim();
+            if (!title || !content) { alert('请输入公告标题与内容'); return; }
+            const { error } = await _supabase.from('tj_announcements_feedbacks').insert([{
+                type: 'announcement', category: title, content, email: currentUser.email
+            }]);
+            if (error) alert('发布失败'); else { alert('公告发布成功！'); document.getElementById('new-ann-title').value = ''; document.getElementById('new-ann-content').value = ''; }
+        }
+
+        function changePage(direction) {
+            adminCurrentPage += direction;
+            if (adminCurrentPage < 1) adminCurrentPage = 1;
+            loadAdminData();
+        }
+
+        async function updateUserStatus(userId, status) {
+            const { error } = await _supabase.from('tj_users').update({ verify_status: status, is_verified: status === 'approved' }).eq('id', userId);
+            if (error) alert('操作失败'); else { alert('状态已更新'); loadAdminData(); }
+        }
+
+        async function deleteUserAccount(userId) {
+            if (!confirm('确定彻底删除该账号？')) return;
+            const { error } = await _supabase.from('tj_users').delete().eq('id', userId);
+            if (error) alert('删除失败'); else { alert('账号已删除'); loadAdminData(); }
+        }
+
+        function toggleParticipation() {
+            alert('已成功切换本周匹配参与状态！每周六下午 12:30 准时配对。');
+        }
     </script>
 </body>
 </html>
