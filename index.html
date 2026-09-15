@@ -1,4 +1,3 @@
-<!-- Ver2.1.5.html -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -32,10 +31,9 @@
     <style>
         body { background-color: #f8fafc; font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif; color: #1e293b; }
         input[type="range"] { accent-color: #0284c7; }
-        .chip-option { cursor: pointer; transition: all 0.2s ease; }
-        .chip-option.active { background-color: #0284c7; color: white; border-color: #0284c7; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .chip-checkbox:checked + label { background-color: #0284c7; color: #ffffff; border-color: #0284c7; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-primary/20 selection:text-primary">
@@ -53,21 +51,21 @@
         </nav>
 
         <div class="flex items-center space-x-4">
-            <!-- 🔔 通知铃铛 -->
+            <!-- 🔔 通知铃铛 (附着页，无分页) -->
             <div class="relative">
                 <button onclick="toggleNotificationBell()" class="p-2 text-slate-600 hover:text-primary transition rounded-full hover:bg-slate-100 relative">
                     <span class="text-lg">🔔</span>
-                    <span id="unread-dot" class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full hidden"></span>
+                    <span id="unread-dot" class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
                 </button>
-                <div id="bell-popup" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50 text-xs space-y-3">
-                    <div class="font-bold text-slate-800 border-b pb-2 flex justify-between">
-                        <span>系统消息通知</span>
-                        <span class="text-[10px] text-slate-400">无分页展示</span>
+                <div id="bell-popup" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50 text-xs space-y-3">
+                    <div class="font-bold text-slate-800 border-b pb-2 flex justify-between items-center">
+                        <span>系统实时通知</span>
+                        <span class="text-[10px] text-slate-400">第一期运行中</span>
                     </div>
-                    <div id="bell-list" class="space-y-2 max-h-60 overflow-y-auto">
-                        <div class="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                            <p class="font-semibold text-slate-700">第一期智能配对开启中</p>
-                            <p class="text-slate-500 mt-0.5">每周六下午 12:30 准时结算配对，请确保全量问卷已保存。</p>
+                    <div id="bell-list" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                            <p class="font-semibold text-slate-700">每周定时配对提醒</p>
+                            <p class="text-slate-500 mt-0.5">每周六下午 12:30 准时进行智能配对，请确保完成 47 道建档问卷并保持参与开启状态。</p>
                         </div>
                     </div>
                 </div>
@@ -80,9 +78,8 @@
 
     <!-- 主视图容器 -->
     <main class="flex-grow">
-        <!-- 1. 未登录首页封面与认证视图 (Cover Page) -->
+        <!-- 1. 未登录首页封面与认证视图 -->
         <section id="view-auth" class="min-h-screen flex flex-col justify-between bg-cover bg-center transition-all duration-500" style="background-image: linear-gradient(rgba(15,23,42,0.55), rgba(15,23,42,0.75)), url('https://img.remit.ee/i/c784YEKLJhxP');">
-            <!-- 顶部公共导航 -->
             <div class="p-6 flex justify-between items-center text-white/90 text-sm max-w-7xl mx-auto w-full">
                 <div class="flex items-center space-x-2 font-bold text-xl">
                     <span class="bg-primary px-2.5 py-1 rounded-lg text-white shadow">津</span>
@@ -96,51 +93,58 @@
                 </div>
             </div>
 
-            <!-- 主内容区域 (标语 + 倒计时 + 真实统计) -->
             <div class="max-w-7xl mx-auto w-full px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <!-- 左侧：标语与配对统计数据 -->
+                <!-- 左侧：标语、实时倒计时与第一期匹配统计 -->
                 <div class="lg:col-span-7 space-y-6 text-white">
-                    <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full text-xs border border-white/20">
+                    <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs border border-white/20">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>天津高校学子专属交友与双向智能匹配平台</span>
+                        <span>面向天津市高校学子的校园智能匹配平台</span>
                     </div>
                     <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
                         美丽天津，等你赴约
                     </h1>
                     <p class="text-white/80 text-sm md:text-base max-w-xl leading-relaxed">
-                        基于 47 项维度心理与价值观契合度算法，天津各大高校学子真实认证，数据全程安全加密。
+                        47 维度全方位精准心理契合匹配。天津各大高校学子真实认证，数据云端安全加密保护。
                     </p>
 
                     <!-- 周六12:30 定时倒计时 -->
                     <div class="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/20 max-w-md space-y-2">
                         <div class="flex justify-between items-center text-xs text-white/70">
-                            <span>第一期配对倒计时</span>
-                            <span class="font-bold text-sky-300">每周六下午 12:30 准时结算</span>
+                            <span>下次配对节点倒计时</span>
+                            <span class="font-bold text-sky-300">每周六下午 12:30</span>
                         </div>
                         <div id="countdown-display" class="text-2xl md:text-3xl font-mono font-bold text-white tracking-wider">
                             00天00小时00分00秒
                         </div>
                     </div>
 
-                    <!-- 真实参与人数与第一期运行状态卡片 -->
+                    <!-- 真实参与人数与第 1 期匹配数据 -->
                     <div class="space-y-3 pt-2">
                         <div class="flex items-center space-x-3">
                             <span class="text-3xl font-extrabold text-sky-300" id="stat-total-users">0</span>
-                            <span class="text-xs text-white/80">位高校同学已注册认证并入池</span>
+                            <span class="text-xs text-white/80">位高校同学已注册认证并加入系统</span>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 space-y-2">
+
+                        <!-- 第 1 期匹配数据模块 (带分页控制) -->
+                        <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 space-y-3 max-w-md">
                             <div class="flex justify-between items-center text-xs font-semibold">
-                                <span>匹配期数状态</span>
-                                <span class="text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full">第一期 进行中</span>
+                                <span>当前匹配运行期数</span>
+                                <span id="phase-page-indicator" class="text-white/70">第 1 / 1 页</span>
                             </div>
-                            <p class="text-xs text-white/70 leading-relaxed">
-                                本系统为全新第一期正式上线运作，取消虚假往期记录。所有匹配均由云端根据已审核用户的 47 道问卷实时智能配对。
-                            </p>
+                            <div id="phase-card-grid" class="grid grid-cols-1 gap-2">
+                                <div class="p-3 bg-white/10 rounded-xl border border-white/10 text-center flex justify-between items-center">
+                                    <div class="text-left">
+                                        <div class="text-xs font-bold text-sky-200">正式上线 - 第 1 期</div>
+                                        <div class="text-[11px] text-white/70">全天津高校智能配对进行中</div>
+                                    </div>
+                                    <span class="text-sm font-bold text-sky-300" id="phase-1-count">0 人准备配对</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 右侧：登录/注册/找回密码 模态卡片 -->
+                <!-- 右侧：登录/注册/找回密码 -->
                 <div class="lg:col-span-5 flex justify-center">
                     <div class="bg-white/95 backdrop-blur-xl p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/30 text-slate-800">
                         <div class="text-center mb-6">
@@ -149,7 +153,6 @@
                             <p class="text-xs text-slate-500 mt-1">天津高校学子专属交友平台</p>
                         </div>
 
-                        <!-- 选项卡切换 -->
                         <div class="flex border-b border-slate-200 mb-6 text-sm font-medium">
                             <button onclick="switchAuthMode('login')" id="tab-login" class="flex-1 pb-2 text-center border-b-2 border-primary text-primary font-semibold">账号登录</button>
                             <button onclick="switchAuthMode('register')" id="tab-register" class="flex-1 pb-2 text-center text-slate-400">新用户注册</button>
@@ -172,9 +175,9 @@
                         <!-- 2. 注册表单 -->
                         <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">电子邮箱 (优先使用高校邮箱)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">电子邮箱 (优先高校邮箱)</label>
                                 <div class="flex space-x-2">
-                                    <input type="email" id="reg-email" required placeholder="name@tju.edu.cn 或 QQ/163邮箱" class="flex-1 px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
+                                    <input type="email" id="reg-email" required placeholder="如 name@tju.edu.cn 或个人邮箱" class="flex-1 px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary">
                                     <button type="button" onclick="sendRealEmailCode()" id="btn-send-code" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 text-xs rounded-xl transition whitespace-nowrap">发送验证码</button>
                                 </div>
                             </div>
@@ -201,8 +204,8 @@
                             
                             <div id="no-edu-box" class="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
                                 <div>
-                                    <label class="block text-[11px] font-bold text-amber-700 mb-1">非高校邮箱说明 / 审核备注</label>
-                                    <input type="text" id="reg-no-edu-reason" placeholder="简述无高校邮箱原因（如邮箱未激活）" class="w-full px-3 py-1.5 text-xs border rounded-lg bg-white">
+                                    <label class="block text-[11px] font-bold text-amber-700 mb-1">无高校邮箱原因说明</label>
+                                    <input type="text" id="reg-no-edu-reason" placeholder="如：新生邮箱尚未激活" class="w-full px-3 py-1.5 text-xs border rounded-lg bg-white">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-primary mb-1">学生证 / 学信网证明截图上传</label>
@@ -238,13 +241,12 @@
                 </div>
             </div>
 
-            <!-- 页脚 -->
             <div class="text-center py-4 text-xs text-white/70 max-w-7xl mx-auto w-full border-t border-white/10">
                 Copyright © 2026 TJDs's team All Rights Reserved.
             </div>
         </section>
 
-        <!-- 未登录公共浮动弹窗 -->
+        <!-- 未登录公共弹窗 -->
         <div id="public-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 relative custom-scrollbar">
                 <button onclick="closePublicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
@@ -252,265 +254,334 @@
             </div>
         </div>
 
-        <!-- 2. 学生端 - 首页概览 (`view-home`) -->
+        <!-- 2. 学生端 - 首页概览 -->
         <section id="view-home" class="hidden max-w-4xl mx-auto p-6 space-y-6">
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-borderClr flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 class="font-bold text-2xl text-slate-800">你好，<span id="home-nickname" class="text-primary">同学</span></h2>
-                    <p class="text-sm text-slate-500 mt-1">审核状态：<span id="home-audit-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">正在审核中</span></p>
+                    <p class="text-sm text-slate-500 mt-1">账号状态：<span id="home-audit-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">已审核通过</span></p>
                 </div>
                 <div class="text-left md:text-right bg-cream px-4 py-2.5 rounded-2xl border border-blue-100">
-                    <span class="text-xs text-slate-400 block">第一期配对节点</span>
-                    <span class="text-sm font-bold text-primary">每周六下午 12:30 结算</span>
+                    <span class="text-xs text-slate-400 block">定时配对节点</span>
+                    <span class="text-sm font-bold text-primary">每周六下午 12:30</span>
                 </div>
             </div>
 
-            <!-- 明确的参与/不参加控制区 -->
+            <!-- 本周匹配参与模式开关 (用户可选择不参加) -->
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-borderClr space-y-4">
-                <h3 class="font-bold text-lg text-slate-800">第一期匹配参与意愿控制</h3>
+                <h3 class="font-bold text-lg text-slate-800">本周匹配参与与开关状态</h3>
                 <div class="p-5 bg-cream rounded-2xl border border-blue-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <span id="participation-status-title" class="text-sm font-bold text-primary block">参与当期双向智能配对</span>
-                        <span id="participation-status-desc" class="text-xs text-slate-600 mt-1 block">当前状态：已开启本期匹配（您的问卷将进入算法匹配池）</span>
+                        <span id="participation-mode-title" class="text-sm font-bold text-primary block">当前状态：开启参与当期智能双向配对</span>
+                        <p id="participation-status-desc" class="text-xs text-slate-600 mt-1">您已加入本周六 12:30 匹配池，系统将根据您的 47 道问卷为您计算契合对象。</p>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <button onclick="updateParticipationStatus(true)" id="btn-participate-yes" class="px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-primary text-white">确定参加本期配对</button>
-                        <button onclick="updateParticipationStatus(false)" id="btn-participate-no" class="px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-slate-200 text-slate-700 hover:bg-slate-300">暂不参加 (保留档案)</button>
-                    </div>
+                    <button onclick="toggleParticipationState()" id="btn-participate-toggle" class="bg-primary hover:bg-primaryHover text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition shadow-md whitespace-nowrap">切换为：暂不参加本周配对</button>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div onclick="switchTab('questionnaire')" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md cursor-pointer transition space-y-2">
                     <div class="text-2xl">📝</div>
-                    <div class="font-bold text-slate-800">填写/修改 47 道全量问卷</div>
-                    <div class="text-xs text-slate-500">涵盖 5 大维度心理与价值观考核，提升契合匹配度。</div>
+                    <div class="font-bold text-slate-800">编辑 47 题建档问卷</div>
+                    <div class="text-xs text-slate-500">完善 5 大维度全方位心理与生活细致问卷。</div>
                 </div>
                 <div onclick="switchTab('reveal')" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md cursor-pointer transition space-y-2">
                     <div class="text-2xl">🎡</div>
-                    <div class="font-bold text-slate-800">查看配对揭晓</div>
-                    <div class="text-xs text-slate-500">查看每周六 12:30 生成的匹配对象与契合度解析。</div>
+                    <div class="font-bold text-slate-800">查看配对揭晓 (第 1 期)</div>
+                    <div class="text-xs text-slate-500">查看每周六生成的匹配结果与契合度理由。</div>
                 </div>
                 <div onclick="switchTab('announcement-feedback')" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md cursor-pointer transition space-y-2">
                     <div class="text-2xl">📢</div>
                     <div class="font-bold text-slate-800">公告与意见反馈</div>
-                    <div class="text-xs text-slate-500">浏览系统公告，向管理员提交 4 大类反馈诉求。</div>
+                    <div class="text-xs text-slate-500">查阅平台更新公告，向管理员提交建议或诉求。</div>
                 </div>
             </div>
         </section>
 
-        <!-- 3. 学生端 - 47 道全方位建档问卷系统 (`view-questionnaire`) -->
+        <!-- 3. 学生端 - 47 道全维度建档问卷系统 -->
         <section id="view-questionnaire" class="hidden max-w-4xl mx-auto p-6 space-y-6">
             <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-6">
-                <!-- 头部与进度指示 -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-2">
                     <div>
-                        <h2 class="font-bold text-2xl text-primary">天津高校学子全方位建档问卷 (共47题)</h2>
-                        <p class="text-xs text-slate-500 mt-1">包含心理考核与契合度匹配算法，请如实填写以获得最高匹配精度。</p>
+                        <h2 class="font-bold text-2xl text-primary">天津高校学子 47 题全方位建档问卷</h2>
+                        <p class="text-xs text-slate-500 mt-1">完全参照天大 TJU Date 问卷标准，涵盖 5 大维度心理考核与生活细致契合点。</p>
                     </div>
-                    <div class="text-right">
-                        <span id="q-step-indicator" class="text-xs font-bold text-primary block">维度 1 / 5</span>
-                        <span id="questionnaire-save-tip" class="text-xs text-emerald-600 font-bold"></span>
-                    </div>
+                    <span id="questionnaire-save-tip" class="text-xs text-emerald-600 font-bold"></span>
                 </div>
 
-                <!-- 维度模块导航卡片 (分页) -->
-                <div class="flex border-b border-slate-200 text-xs font-bold overflow-x-auto">
-                    <button onclick="goToQStep(1)" id="q-tab-1" class="px-4 py-2 border-b-2 border-primary text-primary whitespace-nowrap">一、基本约束 (10题)</button>
-                    <button onclick="goToQStep(2)" id="q-tab-2" class="px-4 py-2 text-slate-400 whitespace-nowrap">二、价值观与规划 (10题)</button>
-                    <button onclick="goToQStep(3)" id="q-tab-3" class="px-4 py-2 text-slate-400 whitespace-nowrap">三、生活颗粒度 (9题)</button>
-                    <button onclick="goToQStep(4)" id="q-tab-4" class="px-4 py-2 text-slate-400 whitespace-nowrap">四、心理与沟通 (9题)</button>
-                    <button onclick="goToQStep(5)" id="q-tab-5" class="px-4 py-2 text-slate-400 whitespace-nowrap">五、吸引力与预期 (9题)</button>
+                <!-- 维度模块选项卡 -->
+                <div class="flex space-x-2 border-b pb-3 overflow-x-auto text-xs font-bold custom-scrollbar">
+                    <button onclick="switchQTab(1)" id="qtab-btn-1" class="px-3.5 py-1.5 rounded-xl bg-primary text-white transition whitespace-nowrap">一、基本信息 (12题)</button>
+                    <button onclick="switchQTab(2)" id="qtab-btn-2" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 transition whitespace-nowrap">二、核心价值观 (10题)</button>
+                    <button onclick="switchQTab(3)" id="qtab-btn-3" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 transition whitespace-nowrap">三、生活颗粒度 (9题)</button>
+                    <button onclick="switchQTab(4)" id="qtab-btn-4" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 transition whitespace-nowrap">四、情感风格 (9题)</button>
+                    <button onclick="switchQTab(5)" id="qtab-btn-5" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 transition whitespace-nowrap">五、吸引力预期 (7题)</button>
                 </div>
 
-                <form id="form-questionnaire" onsubmit="saveQuestionnaire(event)" class="space-y-6 text-sm">
-                    <!-- 维度 1：基本信息与现实约束 (第 1 - 10 题) -->
-                    <div id="q-step-box-1" class="space-y-4">
-                        <h3 class="font-bold text-slate-800 text-base border-l-4 border-primary pl-2">一、基本信息与现实约束</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">1. 真实姓名 (仅管理员审核可见)</label><input type="text" id="q-real_name" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">2. 昵称 (匹配对象可见)</label><input type="text" id="q-nickname" required class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">3. 生理性别</label><select id="q-gender" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">4. 期望匹配对象性别</label><select id="q-match_gender_pref" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="女">女</option><option value="男">男</option><option value="都可以">都可以</option></select></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">5. 来 TJDs 主要目的</label><select id="q-intent" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="认真脱单">认真脱单</option><option value="拓展社交圈">拓展社交圈</option><option value="寻找自习研友">寻找自习研友</option><option value="顺其自然">顺其自然</option></select></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">6. 高校与常驻校区</label><input type="text" id="q-school_campus" placeholder="如：天津大学 - 卫津路校区" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">7. 年级 / 学业阶段</label><input type="text" id="q-grade_level" placeholder="如：大二 / 研一 / 博士" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">8. 个人身高 (cm)</label><input type="number" id="q-height_self" placeholder="如：175" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">9. 期望对方身高范围 (cm)</label><div class="flex space-x-2"><input type="number" id="q-height_pref_min" placeholder="最低" class="w-1/2 px-3 py-2 border rounded-xl bg-white text-xs"><input type="number" id="q-height_pref_max" placeholder="最高" class="w-1/2 px-3 py-2 border rounded-xl bg-white text-xs"></div></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">10. 微信/手机联系方式 (配对成功后交换)</label><input type="text" id="q-contact_info" required placeholder="微信号或手机号" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"></div>
+                <form id="form-questionnaire" onsubmit="saveQuestionnaire(event)" class="space-y-6 text-xs">
+                    <!-- 维度一：基本信息与现实约束 (Q1 - Q12) -->
+                    <div id="qsec-1" class="space-y-3">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q1. 真实姓名 (仅管理员审核可见)</label>
+                            <input type="text" id="q1_real_name" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q2. 匹配展示昵称 (对方可见)</label>
+                            <input type="text" id="q2_nickname" required class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q3. 性别</label>
+                            <select id="q3_gender" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q4. 期望匹配对象性别</label>
+                            <select id="q4_match_gender_pref" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="女">女</option><option value="男">男</option><option value="都可以">都可以</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q5. 来 TJDs 主要目的</label>
+                            <select id="q5_intent" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="认真脱单">认真脱单</option><option value="先认识着">先认识着</option><option value="顺其自然">顺其自然</option><option value="寻找研友/搭子">寻找研友/搭子</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q6. 当前学业层级与年级</label>
+                            <input type="text" id="q6_grade" placeholder="如：本科大二 / 硕士研一" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q7. 常驻校区与院系名称</label>
+                            <input type="text" id="q7_campus_college" placeholder="如：卫津路校区 - 药学院" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q8. 跨校区/异校恋爱接受度</label>
+                            <select id="q8_cross_campus_attitude" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="完全接受">完全接受</option><option value="优先同校区">优先同校区</option><option value="仅限同校区">仅限同校区</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q9. 年龄与期望匹配年龄差距</label>
+                            <input type="text" id="q9_age" placeholder="如：20岁 (期望同岁或±2岁)" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q10. 身高 (cm) 及期望对方身高范围</label>
+                            <input type="text" id="q10_height_range" placeholder="如：自己178cm / 期望对方160-172cm" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q11. 家乡归属与倾向匹配地域</label>
+                            <input type="text" id="q11_hometown_pref" placeholder="如：广东潮州 / 倾向北方或天津本地" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q12. 真实联系方式 (微信/手机，配对成功后交换)</label>
+                            <input type="text" id="q12_contact_info" required placeholder="微信号或手机号" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
                         </div>
                     </div>
 
-                    <!-- 维度 2：核心价值观与人生规划 (第 11 - 20 题) -->
-                    <div id="q-step-box-2" class="space-y-5 hidden">
-                        <h3 class="font-bold text-slate-800 text-base border-l-4 border-primary pl-2">二、核心价值观与人生规划</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>11. 学业/事业进取心倾向</span><span id="val-career_ambition" class="text-primary font-bold">7 分</span></div>
-                                <input type="range" id="q-career_ambition" min="1" max="10" value="7" oninput="document.getElementById('val-career_ambition').innerText=this.value+' 分'" class="w-full">
+                    <!-- 维度二：核心价值观与人生方向 (Q13 - Q22 滑块题为主) -->
+                    <div id="qsec-2" class="hidden space-y-3">
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q13. 学业/事业投入度 (自己)</span><span id="v13">7 分</span></div>
+                            <input type="range" id="q13_career_self" min="1" max="10" value="7" oninput="document.getElementById('v13').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q14. 学业/事业投入度 (期望对方)</span><span id="v14">7 分</span></div>
+                            <input type="range" id="q14_career_partner" min="1" max="10" value="7" oninput="document.getElementById('v14').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q15. 稳定规避风险 vs 探索冒险 (自己)</span><span id="v15">5 分</span></div>
+                            <input type="range" id="q15_stability_self" min="1" max="10" value="5" oninput="document.getElementById('v15').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q16. 稳定规避风险 vs 探索冒险 (期望对方)</span><span id="v16">5 分</span></div>
+                            <input type="range" id="q16_stability_partner" min="1" max="10" value="5" oninput="document.getElementById('v16').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q17. 消费观念偏向 (自己：1节俭实用 <-> 10品质体验)</span><span id="v17">5 分</span></div>
+                            <input type="range" id="q17_consumption_self" min="1" max="10" value="5" oninput="document.getElementById('v17').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q18. 消费观念偏向 (期望对方)</span><span id="v18">5 分</span></div>
+                            <input type="range" id="q18_consumption_partner" min="1" max="10" value="5" oninput="document.getElementById('v18').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q19. 恋爱在当前生活中的优先级 (1附庸调剂 <-> 10核心首位)</span><span id="v19">7 分</span></div>
+                            <input type="range" id="q19_relationship_priority" min="1" max="10" value="7" oninput="document.getElementById('v19').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q20. 毕业后发展与长期定居规划</label>
+                            <select id="q20_longterm_commitment" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="确定留津发展">确定留津发展</option><option value="顺其自然/听从分配">顺其自然/听从分配</option><option value="规划明确/回家乡发展">规划明确/回家乡发展</option></select>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+                            <label class="font-bold text-slate-700 block">Q21. 核心价值观认可关键词 (多选卡片)</label>
+                            <div class="flex flex-wrap gap-2" id="q21-chips">
+                                <input type="checkbox" value="责任感" id="v21-1" class="hidden chip-checkbox"><label for="v21-1" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">责任感</label>
+                                <input type="checkbox" value="情绪稳定" id="v21-2" class="hidden chip-checkbox"><label for="v21-2" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">情绪稳定</label>
+                                <input type="checkbox" value="独立自主" id="v21-3" class="hidden chip-checkbox"><label for="v21-3" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">独立自主</label>
+                                <input type="checkbox" value="幽默风趣" id="v21-4" class="hidden chip-checkbox"><label for="v21-4" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">幽默风趣</label>
+                                <input type="checkbox" value="坦诚沟通" id="v21-5" class="hidden chip-checkbox"><label for="v21-5" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">坦诚沟通</label>
                             </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>12. 追求安稳 vs 渴望探索冒险</span><span id="val-stability_preference" class="text-primary font-bold">5 分</span></div>
-                                <input type="range" id="q-stability_preference" min="1" max="10" value="5" oninput="document.getElementById('val-stability_preference').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>13. 消费观倾向 (1精打细算 - 10及时行乐)</span><span id="val-consumption_view" class="text-primary font-bold">5 分</span></div>
-                                <input type="range" id="q-consumption_view" min="1" max="10" value="5" oninput="document.getElementById('val-consumption_view').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">14. 毕业后意向发展城市</label>
-                                <select id="q-future_location" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="天津本地">天津本地</option><option value="北上广深">北上广深等一线城市</option><option value="回家乡">回家乡发展</option><option value="随缘/看伴侣">随缘 / 看伴侣</option></select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">15. 对长期承诺/婚姻的态度</label>
-                                <select id="q-marriage_timeline" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="3年内有明确打算">3年内有明确打算</option><option value="毕业后3-5年">毕业后3-5年</option><option value="顺其自然">顺其自然</option><option value="暂不考虑婚姻">暂不考虑婚姻</option></select>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>16. 原生家庭依恋与亲密度</span><span id="val-family_bound_importance" class="text-primary font-bold">7 分</span></div>
-                                <input type="range" id="q-family_bound_importance" min="1" max="10" value="7" oninput="document.getElementById('val-family_bound_importance').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>17. 对公共热点议题讨论的热情</span><span id="val-political_social_interest" class="text-primary font-bold">5 分</span></div>
-                                <input type="range" id="q-political_social_interest" min="1" max="10" value="5" oninput="document.getElementById('val-political_social_interest').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>18. 面对学业高压时的抗压弹性</span><span id="val-academic_pressure_handling" class="text-primary font-bold">8 分</span></div>
-                                <input type="range" id="q-academic_pressure_handling" min="1" max="10" value="8" oninput="document.getElementById('val-academic_pressure_handling').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>19. 亲密关系平等分工认同度</span><span id="val-gender_roles_attitude" class="text-primary font-bold">9 分</span></div>
-                                <input type="range" id="q-gender_roles_attitude" min="1" max="10" value="9" oninput="document.getElementById('val-gender_roles_attitude').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">20. 亲密关系中最不可妥协的原则底线</label>
-                                <select id="q-core_bottom_line" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="绝对忠诚与坦诚">绝对忠诚与坦诚</option><option value="情绪价值与积极沟通">情绪价值与积极沟通</option><option value="尊重个人独立空间">尊重个人独立空间</option><option value="三观与生活品位契合">三观与生活品位契合</option></select>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+                            <label class="font-bold text-rose-700 block">Q22. 对方不可触碰的红线底线 (多选)</label>
+                            <div class="flex flex-wrap gap-2" id="q22-chips">
+                                <input type="checkbox" value="冷暴力" id="v22-1" class="hidden chip-checkbox"><label for="v22-1" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">冷暴力</label>
+                                <input type="checkbox" value="不回消息/玩失踪" id="v22-2" class="hidden chip-checkbox"><label for="v22-2" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">不回消息/失踪</label>
+                                <input type="checkbox" value="毫无上进规划" id="v22-3" class="hidden chip-checkbox"><label for="v22-3" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">毫无上进规划</label>
+                                <input type="checkbox" value="异性界限模糊" id="v22-4" class="hidden chip-checkbox"><label for="v22-4" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">异性界限模糊</label>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 维度 3：生活颗粒度与日常节奏 (第 21 - 29 题) -->
-                    <div id="q-step-box-3" class="space-y-5 hidden">
-                        <h3 class="font-bold text-slate-800 text-base border-l-4 border-primary pl-2">三、生活颗粒度与日常节奏</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">21. 作息规律类型</label><select id="q-sleep_habit" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="早睡早起神仙作息">早睡早起神仙作息</option><option value="规律适中">规律适中</option><option value="深夜灵感夜猫子">深夜灵感夜猫子</option></select></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">22. 周末理想度过模式</label><select id="q-weekend_mode" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="户外探索/Citywalk">户外探索 / Citywalk</option><option value="宅家追剧游戏休息">宅家追剧游戏休息</option><option value="图书馆自习冲刺">图书馆自习冲刺</option><option value="探店美食/观展">探店美食 / 观展</option></select></div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>23. 个人社交电量 (1极度社恐 - 10社交达人)</span><span id="val-social_energy_battery" class="text-primary font-bold">5 分</span></div>
-                                <input type="range" id="q-social_energy_battery" min="1" max="10" value="5" oninput="document.getElementById('val-social_energy_battery').innerText=this.value+' 分'" class="w-full">
+                    <!-- 维度三：生活颗粒度 (Q23 - Q31) -->
+                    <div id="qsec-3" class="hidden space-y-3">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q23. 日常作息习惯</label>
+                            <select id="q23_sleep_habit" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="早睡早起">早睡早起</option><option value="规律适中">规律适中</option><option value="夜猫子">夜猫子</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q24. 周末休闲偏好</label>
+                            <select id="q24_weekend_habit" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="户外探索/Citywalk">户外探索/Citywalk</option><option value="宅家追剧/游戏">宅家追剧/游戏</option><option value="咖啡馆/图书馆自习">咖啡馆/图书馆自习</option><option value="运动健身">运动健身</option></select>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q25. 社交频率需求 (1极度宅 <-> 10社交达人)</span><span id="v25">5 分</span></div>
+                            <input type="range" id="q25_social_freq" min="1" max="10" value="5" oninput="document.getElementById('v25').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q26. 运动健身习惯程度</span><span id="v26">5 分</span></div>
+                            <input type="range" id="q26_exercise_habit" min="1" max="10" value="5" oninput="document.getElementById('v26').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q27. 对方因科研/学业忙碌的理解接受度</span><span id="v27">8 分</span></div>
+                            <input type="range" id="q27_busy_acceptance" min="1" max="10" value="8" oninput="document.getElementById('v27').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q28. 理想的见面与约会频率</label>
+                            <select id="q28_meet_frequency" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="每周 2-3 次">每周 2-3 次</option><option value="每周 1 次">每周 1 次</option><option value="每天见一会儿">每天见一会儿</option><option value="随缘灵活">随缘灵活</option></select>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+                            <label class="font-bold text-slate-700 block">Q29. 理想约会场景 (多选卡片)</label>
+                            <div class="flex flex-wrap gap-2" id="q29-chips">
+                                <input type="checkbox" value="校园散步" id="v29-1" class="hidden chip-checkbox"><label for="v29-1" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">校园散步</label>
+                                <input type="checkbox" value="食堂探店" id="v29-2" class="hidden chip-checkbox"><label for="v29-2" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">食堂探店</label>
+                                <input type="checkbox" value="看电影展览" id="v29-3" class="hidden chip-checkbox"><label for="v29-3" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">看电影展览</label>
+                                <input type="checkbox" value="咖啡自习" id="v29-4" class="hidden chip-checkbox"><label for="v29-4" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">咖啡自习</label>
                             </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>24. 运动健身频率与热爱度</span><span id="val-exercise_frequency" class="text-primary font-bold">4 分</span></div>
-                                <input type="range" id="q-exercise_frequency" min="1" max="10" value="4" oninput="document.getElementById('val-exercise_frequency').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">25. 饮食口味倾向</label><select id="q-diet_taste_pref" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="无辣不欢">无辣不欢</option><option value="清淡健康">清淡健康</option><option value="甜食控">甜食控</option><option value="杂食随和无所谓">杂食随和无所谓</option></select></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">26. 月度约会消费预算偏好</label><select id="q-spending_on_dating" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="节约实用为主(食堂/漫步)">节约实用为主 (食堂/漫步)</option><option value="适度品质(每周1-2次探店)">适度品质 (每周1-2次探店)</option><option value="追求精致仪式感">追求精致仪式感</option></select></div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>27. 个人生活环境洁癖倾向</span><span id="val-cleanliness_habit" class="text-primary font-bold">7 分</span></div>
-                                <input type="range" id="q-cleanliness_habit" min="1" max="10" value="7" oninput="document.getElementById('val-cleanliness_habit').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">28. 电子游戏/网游投入度</label><select id="q-gaming_habit" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="完全不玩游戏">完全不玩游戏</option><option value="偶做休闲手游">偶做休闲手游</option><option value="重度端游/主机玩家">重度端游 / 主机玩家</option></select></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">29. 对宠物的态度</label><select id="q-pet_preference" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="猫狗狂热爱宠达人">猫狗狂热爱宠达人</option><option value="喜欢但未条件养">喜欢但未条件养</option><option value="保持中立距离">保持中立距离</option><option value="不太接受宠物">不太接受宠物</option></select></div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q30. 奔赴对方校区/迁就对方行程意愿</span><span id="v30">7 分</span></div>
+                            <input type="range" id="q30_relocation_attitude" min="1" max="10" value="7" oninput="document.getElementById('v30').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q31. 饮食口味与生活习惯契合度</label>
+                            <select id="q31_diet_living_style" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="随和都可以">随和都可以</option><option value="偏好辣/重口味">偏好辣/重口味</option><option value="清淡健康">清淡健康</option></select>
                         </div>
                     </div>
 
-                    <!-- 维度 4：心理考核与情感沟通风格 (第 30 - 38 题) -->
-                    <div id="q-step-box-4" class="space-y-5 hidden">
-                        <h3 class="font-bold text-slate-800 text-base border-l-4 border-primary pl-2">四、心理考核与情感沟通风格</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">30. 依恋心理类型自测倾向</label><select id="q-attachment_style" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="安全型(自信且信任伴侣)">安全型 (自信且信任伴侣)</option><option value="焦虑型(渴望频繁确认爱意)">焦虑型 (渴望频繁确认爱意)</option><option value="回避型(需要独立退缩空间)">回避型 (需要独立退缩空间)</option></select></div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>31. 发生矛盾时的反应 (1冷处理 - 10必须立刻厘清)</span><span id="val-conflict_resolution" class="text-primary font-bold">6 分</span></div>
-                                <input type="range" id="q-conflict_resolution" min="1" max="10" value="6" oninput="document.getElementById('val-conflict_resolution').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>32. 消息未及时回复时的心理焦虑度</span><span id="val-no_reply_anxiety" class="text-primary font-bold">4 分</span></div>
-                                <input type="range" id="q-no_reply_anxiety" min="1" max="10" value="4" oninput="document.getElementById('val-no_reply_anxiety').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>33. 关系中对个人独处空间的需要度</span><span id="val-personal_space_need" class="text-primary font-bold">7 分</span></div>
-                                <input type="range" id="q-personal_space_need" min="1" max="10" value="7" oninput="document.getElementById('val-personal_space_need').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">34. 主要表达爱的语言 (Love Language)</label><select id="q-love_expression_style" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="肯定的言语赞美">肯定的言语赞美</option><option value="高质量的精心时刻">高质量的精心时刻</option><option value="贴心的服务行为">贴心的服务行为</option><option value="心意礼物与肢体接触">心意礼物与肢体接触</option></select></div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>35. 对伴侣共情与情绪价值的要求</span><span id="val-emotional_value_need" class="text-primary font-bold">8 分</span></div>
-                                <input type="range" id="q-emotional_value_need" min="1" max="10" value="8" oninput="document.getElementById('val-emotional_value_need').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>36. 对异性社交界限的敏感度</span><span id="val-opposite_sex_boundary" class="text-primary font-bold">8 分</span></div>
-                                <input type="range" id="q-opposite_sex_boundary" min="1" max="10" value="8" oninput="document.getElementById('val-opposite_sex_boundary').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">37. 情绪低落时的宣泄途径</label><select id="q-stress_coping_mechanism" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="向伴侣倾诉寻求安慰">向伴侣倾诉寻求安慰</option><option value="独自消化沉淀">独自消化沉淀</option><option value="运动/睡觉转移注意力">运动 / 睡觉转移注意力</option></select></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">38. 在朋友圈/社交平台公开恋情的态度</label><select id="q-social_media_affection" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="积极大方分享幸福">积极大方分享幸福</option><option value="低调圈内知晓即可">低调圈内知晓即可</option><option value="严格保护个人隐私">严格保护个人隐私</option></select></div>
+                    <!-- 维度四：情感风格与相处反应 (Q32 - Q40) -->
+                    <div id="qsec-4" class="hidden space-y-3">
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q32. 消息未及时回复时的焦虑程度</span><span id="v32">4 分</span></div>
+                            <input type="range" id="q32_anxiety_no_reply" min="1" max="10" value="4" oninput="document.getElementById('v32').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q33. 社交能量类型</label>
+                            <select id="q33_social_energy" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="E 人 (外向充能)">E 人 (外向充能)</option><option value="I 人 (内向独处)">I 人 (内向独处)</option><option value="综合组合型">综合组合型</option></select>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q34. 恋爱仪式感与节日纪念日重视度</span><span id="v34">6 分</span></div>
+                            <input type="range" id="q34_romance_ritual" min="1" max="10" value="6" oninput="document.getElementById('v34').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q35. 异性朋友社交界限严格程度</span><span id="v35">8 分</span></div>
+                            <input type="range" id="q35_opposite_sex_boundary" min="1" max="10" value="8" oninput="document.getElementById('v35').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q36. 发生冲突时的第一处理反应</label>
+                            <select id="q36_conflict_reaction" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="先冷静再理性沟通">先冷静再理性沟通</option><option value="希望立刻当场讲清楚">希望立刻当场讲清楚</option><option value="倾听对方优先退让">倾听对方优先退让</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q37. 在恋爱关系中的角色倾向</label>
+                            <select id="q37_relationship_role" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="照顾者/主导者">照顾者/主导者</option><option value="被照顾者/依赖型">被照顾者/依赖型</option><option value="平等独立互助">平等独立互助</option></select>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q38. 感情推进节奏 (1慢热细水长流 <-> 10快速上头)</span><span id="v38">4 分</span></div>
+                            <input type="range" id="q38_relationship_pace" min="1" max="10" value="4" oninput="document.getElementById('v38').innerText=this.value+' 分'" class="w-full">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q39. 独立个人空间态度</label>
+                            <select id="q39_personal_space_attitude" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="保持一定独立空间">保持一定独立空间</option><option value="希望时刻形影不离">希望时刻形影不离</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q40. 朋友圈/社交平台公开恋情态度</label>
+                            <select id="q40_public_affection_attitude" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white"><option value="大方公开晒图">大方公开晒图</option><option value="低调私密相处">低调私密相处</option><option value="顺其自然">顺其自然</option></select>
                         </div>
                     </div>
 
-                    <!-- 维度 5：吸引力与理想预期 (第 39 - 47 题) -->
-                    <div id="q-step-box-5" class="space-y-5 hidden">
-                        <h3 class="font-bold text-slate-800 text-base border-l-4 border-primary pl-2">五、吸引力维度与理想预期</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">39. 自己最自信的魅力点</label><select id="q-self_attraction_highlight" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="颜值气场与穿搭">颜值气场与穿搭</option><option value="幽默风趣与博学">幽默风趣与博学</option><option value="情绪极度稳定体贴">情绪极度稳定体贴</option><option value="执行力强与靠谱">执行力强与靠谱</option></select></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">40. 期望对方最吸引你的品质</label><select id="q-match_desired_trait" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="智商学识与上进心">智商学识与上进心</option><option value="好看的皮囊与审美">好看的皮囊与审美</option><option value="温柔体贴与共情">温柔体贴与共情</option><option value="阳光开朗与乐观">阳光开朗与乐观</option></select></div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">41. 理想的初次见面场景</label><select id="q-first_date_scenario" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="校园咖啡厅/散步">校园咖啡厅 / 散步</option><option value="图书馆自习讨论">图书馆自习讨论</option><option value="艺术展/剧场看戏">艺术展 / 剧场看戏</option><option value="户外运动/羽毛球">户外运动 / 羽毛球</option></select></div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>42. 颜值外貌在匹配考量中的权重</span><span id="val-appearance_importance" class="text-primary font-bold">6 分</span></div>
-                                <input type="range" id="q-appearance_importance" min="1" max="10" value="6" oninput="document.getElementById('val-appearance_importance').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>43. 对跨校区/轻微异地恋情的接受度</span><span id="val-cross_campus_acceptance" class="text-primary font-bold">8 分</span></div>
-                                <input type="range" id="q-cross_campus_acceptance" min="1" max="10" value="8" oninput="document.getElementById('val-cross_campus_acceptance').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">44. 家乡归属与地域限定偏好</label><select id="q-hometown_preference" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="全国高校学子皆可">全国高校学子皆可</option><option value="优先同省/同地域">优先同省 / 同地域</option><option value="必须限定老乡">必须限定老乡</option></select></div>
-                            <div>
-                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>46. 是否接受前期盲盒盲匹配 (不看照片)</span><span id="val-accept_no_photo_first" class="text-primary font-bold">8 分</span></div>
-                                <input type="range" id="q-accept_no_photo_first" min="1" max="10" value="8" oninput="document.getElementById('val-accept_no_photo_first').innerText=this.value+' 分'" class="w-full">
-                            </div>
-                            <div><label class="block text-xs font-semibold text-slate-600 mb-1">47. 匹配契约与真诚承诺</label><select id="q-participation_commitment" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="我承诺真诚交友，信息真实，不不爽约">我承诺真诚交友，信息真实，不爽约</option></select></div>
+                    <!-- 维度五：吸引力与预期 (Q41 - Q47) -->
+                    <div id="qsec-5" class="hidden space-y-3">
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <div class="flex justify-between font-bold text-slate-700"><span>Q41. 外在形象与颜值看重程度</span><span id="v41">6 分</span></div>
+                            <input type="range" id="q41_appearance_importance" min="1" max="10" value="6" oninput="document.getElementById('v41').innerText=this.value+' 分'" class="w-full">
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">45. 想对未来匹配对象说的一句心里话</label>
-                            <textarea id="q-ideal_match_quote" rows="2" placeholder="愿在津门与你相遇，一起吃煎饼果子，一起做实验..." class="w-full p-3 border rounded-xl bg-white text-xs focus:outline-none focus:border-primary"></textarea>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+                            <label class="font-bold text-slate-700 block">Q42. 个人气质特质自述 (多选卡片)</label>
+                            <div class="flex flex-wrap gap-2" id="q42-chips">
+                                <input type="checkbox" value="阳光温暖" id="v42-1" class="hidden chip-checkbox"><label for="v42-1" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">阳光温暖</label>
+                                <input type="checkbox" value="文艺知性" id="v42-2" class="hidden chip-checkbox"><label for="v42-2" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">文艺知性</label>
+                                <input type="checkbox" value="靠谱稳重" id="v42-3" class="hidden chip-checkbox"><label for="v42-3" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">靠谱稳重</label>
+                            </div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+                            <label class="font-bold text-slate-700 block">Q43. 期待对方拥有的气质类型 (多选卡片)</label>
+                            <div class="flex flex-wrap gap-2" id="q43-chips">
+                                <input type="checkbox" value="温柔体贴" id="v43-1" class="hidden chip-checkbox"><label for="v43-1" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">温柔体贴</label>
+                                <input type="checkbox" value="幽默风趣" id="v43-2" class="hidden chip-checkbox"><label for="v43-2" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">幽默风趣</label>
+                                <input type="checkbox" value="有专业特长" id="v43-3" class="hidden chip-checkbox"><label for="v43-3" class="px-3 py-1 border rounded-lg cursor-pointer bg-white">有专业特长</label>
+                            </div>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q44. 最能打动你的闪光点细节</label>
+                            <input type="text" id="q44_key_attraction_point" placeholder="如：声音好听、细心记住小细节、极强上进心" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q45. 第一次见面约会活动偏好</label>
+                            <input type="text" id="q45_first_date_preference" placeholder="如：喝杯咖啡、图书馆自习、校园散步" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 gap-2">
+                            <label class="font-bold text-slate-700 w-full md:w-1/2">Q46. 理想恋爱的最终状态描述</label>
+                            <input type="text" id="q46_ideal_relationship_state" placeholder="如：相互扶持共同成长，轻松快乐无负担" class="w-full md:w-1/2 px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1">
+                            <label class="font-bold text-slate-700 block">Q47. 想给未来匹配对象说的一句心里话</label>
+                            <textarea id="q47_quote_to_partner" rows="2" placeholder="愿你幸福快乐！三餐按时吃饭..." class="w-full p-2.5 border rounded-lg bg-white"></textarea>
                         </div>
                     </div>
 
-                    <!-- 问卷分页控制按钮 -->
-                    <div class="flex justify-between items-center pt-4 border-t">
-                        <button type="button" onclick="changeQStep(-1)" id="btn-q-prev" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition hidden">上一维度</button>
-                        <button type="button" onclick="changeQStep(1)" id="btn-q-next" class="px-6 py-2 bg-primary hover:bg-primaryHover text-white rounded-xl text-xs font-bold transition">下一维度</button>
-                        <button type="submit" id="btn-q-submit" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition hidden shadow-md">保存 47 道全量问卷至云端</button>
-                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-3 rounded-2xl font-bold text-sm shadow-lg transition">保存全量 47 题建档问卷并同步至云端</button>
                 </form>
             </div>
         </section>
 
-        <!-- 4. 匹配揭晓页 (`view-reveal`) -->
+        <!-- 4. 匹配揭晓专区 (第 1 期) -->
         <section id="view-reveal" class="hidden max-w-3xl mx-auto p-6 space-y-6">
             <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-6 text-center">
                 <div class="w-16 h-16 bg-cream text-primary rounded-full flex items-center justify-center mx-auto text-3xl shadow-sm">🎡</div>
-                <h2 class="font-bold text-2xl text-slate-800">第一期匹配揭晓专区</h2>
-                <p class="text-xs text-slate-500 max-w-md mx-auto">每周六下午 12:30 准时结算。匹配成功后将在此展示对方联系方式与 47 项维度契合理由。</p>
+                <h2 class="font-bold text-2xl text-slate-800">匹配揭晓专区 (第 1 期)</h2>
+                <p class="text-xs text-slate-500 max-w-md mx-auto">每周六下午 12:30 准时进行智能双向配对。配对成功后在此展示彼此契合理由与联系方式。</p>
                 <div id="reveal-results-list" class="space-y-4 text-left">
                     <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200">
                         <div class="flex justify-between items-center font-bold text-sm text-slate-800">
-                            <span>第一期匹配计算状态</span>
-                            <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">已就绪入池</span>
+                            <span>正式上线 - 第 1 期匹配动态</span>
+                            <span id="reveal-status-tag" class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">已开启参与</span>
                         </div>
-                        <p class="text-xs text-slate-600 mt-2">当期配对计算将于本周六 12:30 自动截止并发布，请保持问卷信息真实准确。</p>
+                        <p class="text-xs text-slate-600 mt-2">第 1 期配对计算将在本周六 12:30 准时统一发布，请确保 47 题问卷填写完整。</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 5. 公告与反馈页 (`view-announcement-feedback`) -->
+        <!-- 5. 公告与反馈页 (带分页) -->
         <section id="view-announcement-feedback" class="hidden max-w-4xl mx-auto p-6 space-y-8">
-            <!-- 公告模块 (分页) -->
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-borderClr space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
                     <h2 class="font-bold text-xl text-primary">系统公告</h2>
-                    <span class="text-xs text-slate-400">分页浏览</span>
+                    <span class="text-xs text-slate-400">分页展示</span>
                 </div>
-                <div id="announcement-list" class="space-y-3">
-                    <!-- JS动态渲染公告 -->
-                </div>
+                <div id="announcement-list" class="space-y-3"></div>
                 <div class="flex justify-between items-center text-xs text-slate-500 pt-2">
                     <span id="ann-page-indicator">第 1 页</span>
                     <div class="space-x-2">
@@ -520,12 +591,12 @@
                 </div>
             </div>
 
-            <!-- 反馈模块 (4个选项 + 仅登录可用) -->
+            <!-- 反馈模块 (4个分类选项) -->
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-borderClr space-y-4">
                 <h2 class="font-bold text-xl text-primary border-b pb-3">意见反馈与诉求提交</h2>
                 <form onsubmit="submitFeedback(event)" class="space-y-4 text-sm">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-2">选择反馈类型</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-2">选择反馈选项类型</label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <label class="flex items-center space-x-2 p-3 border rounded-xl cursor-pointer hover:bg-slate-50"><input type="radio" name="fb-category" value="网站建议" checked><span>网站建议</span></label>
                             <label class="flex items-center space-x-2 p-3 border rounded-xl cursor-pointer hover:bg-slate-50"><input type="radio" name="fb-category" value="Bug反馈"><span>Bug反馈</span></label>
@@ -534,25 +605,27 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">详细反馈内容</label>
-                        <textarea id="fb-content" rows="4" required placeholder="请详细描述您的意见、遭遇的Bug或注销/举报原因..." class="w-full p-3 border rounded-xl text-xs focus:outline-none focus:border-primary"></textarea>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">详细反馈内容或诉求</label>
+                        <textarea id="fb-content" rows="4" required placeholder="请详细描述您的建议、遇到的问题或注销/举报原因..." class="w-full p-3 border rounded-xl text-xs focus:outline-none focus:border-primary"></textarea>
                     </div>
                     <button type="submit" class="bg-primary hover:bg-primaryHover text-white px-6 py-2.5 rounded-xl font-semibold text-xs shadow-md transition">提交反馈单</button>
                 </form>
             </div>
         </section>
 
-        <!-- 6. 关于页面 (`view-about`) -->
+        <!-- 6. 关于页面 -->
         <section id="view-about" class="hidden max-w-3xl mx-auto p-6 space-y-6">
             <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-4 text-sm leading-relaxed">
                 <h2 class="font-bold text-2xl text-primary">关于津缘 (TJDs)</h2>
                 <p><strong>Tianjin Date Society (津缘)</strong> 是面向天津市高等院校在校学生的校园智能交友与匹配平台。我们相信：不是多遇见人，而是遇见更合适的人。</p>
                 <h3 class="font-bold text-base text-slate-800 pt-2">工作原理</h3>
-                <p>完成 47 道全量建档问卷（基本约束、核心价值观、生活颗粒度、心理风格与吸引力预期），保持勾选「参与本期匹配」。每周六下午 12:30 系统将为您智能匹配并出具契合度分析。</p>
+                <p>完成全量 47 题建档问卷（包含基本信息、核心价值观、生活颗粒度、情感风格与吸引力预期），保持选择「开启参与本周配对」。每周六下午 12:30 系统将为您匹配一位同学并出具契合理由。</p>
+                <h3 class="font-bold text-base text-slate-800 pt-2">使用资格</h3>
+                <p>仅限天津高校学子注册使用，优先天津高校校园邮箱，非高校邮箱须提交学生证明截图交由管理员审核。</p>
             </div>
         </section>
 
-        <!-- 7. 隐私页面 (`view-privacy`) -->
+        <!-- 7. 隐私页面 -->
         <section id="view-privacy" class="hidden max-w-3xl mx-auto p-6 space-y-6">
             <div class="bg-white p-8 rounded-3xl shadow-sm border border-borderClr space-y-4 text-sm leading-relaxed">
                 <h2 class="font-bold text-2xl text-primary">天津高校学子隐私保护声明</h2>
@@ -566,43 +639,39 @@
             </div>
         </section>
 
-        <!-- 8. 后台管理指挥中心 (`view-admin`) -->
+        <!-- 8. 后台管理指挥中心 (全功能管理系统) -->
         <section id="view-admin" class="hidden max-w-7xl mx-auto p-6 space-y-6">
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-borderClr space-y-6">
                 <div class="flex justify-between items-center border-b pb-4">
                     <div>
                         <h2 class="font-bold text-2xl text-primary">津缘后台管理指挥中心</h2>
-                        <p class="text-xs text-slate-500 mt-1">审核学生账号、管理配对资格、发布公告、答复诉求与管理员团队治理</p>
+                        <p class="text-xs text-slate-500 mt-1">控制学生账号审核、47题档案查阅、下级管理员权限、公告发布与反馈答复</p>
                     </div>
-                    <span id="admin-role-badge" class="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">管理员账号</span>
+                    <span id="admin-role-badge" class="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">超级管理员 (xyhh99@qq.com)</span>
                 </div>
 
-                <!-- 选项卡切换 -->
-                <div class="flex space-x-6 border-b pb-3 text-xs font-bold">
-                    <button onclick="switchAdminTab('users')" id="adm-tab-users" class="text-primary border-b-2 border-primary pb-1">学生与账号审核</button>
-                    <button onclick="switchAdminTab('feedbacks')" id="adm-tab-feedbacks" class="text-slate-500 pb-1">反馈诉求答复 (敏感信息保护)</button>
-                    <button onclick="switchAdminTab('announcements')" id="adm-tab-announcements" class="text-slate-500 pb-1">公告发布与管理</button>
-                    <button onclick="switchAdminTab('admins')" id="adm-tab-admins" class="text-slate-500 pb-1">管理员团队配置 (超级管理员专属)</button>
+                <!-- 后台主选项卡 -->
+                <div class="flex space-x-6 border-b pb-3 text-xs font-bold overflow-x-auto custom-scrollbar">
+                    <button onclick="switchAdminTab('users')" id="adm-tab-users" class="text-primary border-b-2 border-primary pb-1 whitespace-nowrap">学生档案与审核 (带分页)</button>
+                    <button onclick="switchAdminTab('feedbacks')" id="adm-tab-feedbacks" class="text-slate-500 pb-1 whitespace-nowrap">反馈诉求答复 (隐藏敏感信息)</button>
+                    <button onclick="switchAdminTab('announcements')" id="adm-tab-announcements" class="text-slate-500 pb-1 whitespace-nowrap">公告发布与编辑</button>
+                    <button onclick="switchAdminTab('admins')" id="adm-tab-admins" class="text-slate-500 pb-1 whitespace-nowrap">管理员团队配置 (仅超级管理员)</button>
                 </div>
 
-                <!-- 子模块 1：学生账号审核与配对权限 (带分页) -->
+                <!-- 模块 1：学生账号审核与档案查阅 (带分页) -->
                 <div id="adm-sec-users" class="space-y-4">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
                                 <tr>
                                     <th class="p-3">邮箱账号</th>
-                                    <th class="p-3">高校</th>
-                                    <th class="p-3">无高校邮箱备注</th>
-                                    <th class="p-3">证明材料</th>
+                                    <th class="p-3">学校 / 证明材料</th>
                                     <th class="p-3">审核状态</th>
-                                    <th class="p-3">配对池权限</th>
-                                    <th class="p-3 text-right">审核操作</th>
+                                    <th class="p-3">当期配对参与</th>
+                                    <th class="p-3 text-right">管理与档案操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-user-table" class="divide-y divide-slate-100">
-                                <!-- JS 动态渲染 -->
-                            </tbody>
+                            <tbody id="admin-user-table" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                     <div class="flex justify-between items-center text-xs text-slate-500 pt-2">
@@ -614,27 +683,25 @@
                     </div>
                 </div>
 
-                <!-- 子模块 2：用户反馈与诉求答复 (仅显示邮箱与诉求) -->
+                <!-- 模块 2：用户反馈与诉求答复 -->
                 <div id="adm-sec-feedbacks" class="hidden space-y-4">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
                                 <tr>
-                                    <th class="p-3">提交用户邮箱</th>
+                                    <th class="p-3">提交邮箱</th>
                                     <th class="p-3">诉求分类</th>
                                     <th class="p-3">反馈详细内容</th>
                                     <th class="p-3">管理员答复</th>
                                     <th class="p-3 text-right">操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-feedback-table" class="divide-y divide-slate-100">
-                                <!-- JS 动态渲染 -->
-                            </tbody>
+                            <tbody id="admin-feedback-table" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- 子模块 3：公告发布管理 -->
+                <!-- 模块 3：公告发布与管理 -->
                 <div id="adm-sec-announcements" class="hidden space-y-4">
                     <div class="p-4 bg-slate-50 rounded-2xl border space-y-3">
                         <h3 class="font-bold text-sm text-slate-800">发布新公告</h3>
@@ -646,32 +713,29 @@
                     </div>
                 </div>
 
-                <!-- 子模块 4：管理员团队配置 (仅 xyhh99@qq.com 可用) -->
+                <!-- 模块 4：管理员团队配置 (仅超级管理员 xyhh99@qq.com 专属) -->
                 <div id="adm-sec-admins" class="hidden space-y-4">
                     <div id="admin-create-box" class="p-4 bg-slate-50 rounded-2xl border space-y-3">
-                        <h3 class="font-bold text-sm text-slate-800">增设 / 授权团队管理员</h3>
+                        <h3 class="font-bold text-sm text-slate-800">增设 / 赋予管理员权限</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <input type="email" id="new-admin-email" placeholder="管理员邮箱" class="px-3 py-2 border rounded-xl text-xs bg-white">
-                            <input type="password" id="new-admin-pwd" placeholder="设定登录密码" class="px-3 py-2 border rounded-xl text-xs bg-white">
-                            <button onclick="createNewAdmin()" class="bg-primary text-white px-4 py-2 rounded-xl text-xs font-semibold">创建管理员</button>
+                            <input type="password" id="new-admin-pwd" placeholder="设定初始密码" class="px-3 py-2 border rounded-xl text-xs bg-white">
+                            <button onclick="createNewAdmin()" class="bg-primary text-white px-4 py-2 rounded-xl text-xs font-semibold">授权创建管理员</button>
                         </div>
                     </div>
-                    <div id="admin-list-container" class="space-y-2">
-                        <!-- 管理员列表 -->
-                    </div>
+                    <div id="admin-list-container" class="space-y-2"></div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- JS 控制脚本 -->
+    <!-- 前端逻辑 JS -->
     <script>
         const supabaseUrl = 'https://owyidjofutkihavyuhki.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93eWlkam9mdXRraWhhdnl1aGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNTAxMDgsImV4cCI6MjEwNDgyNjEwOH0.1Wt1e8f1mKNJYMhKvZ-yI-u6eioQHyD8BCJvCWDb2R8';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         let currentUser = null;
-        let qCurrentStep = 1;
         let adminUserPage = 1;
         const adminUserPageSize = 5;
         let annPage = 1;
@@ -685,7 +749,7 @@
             const savedUser = localStorage.getItem('TJDs_current_user');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
-                syncUserStatusRealtime();
+                showMainApp();
             } else {
                 showAuthView();
             }
@@ -699,10 +763,7 @@
 
                 const dayOfWeek = now.getDay();
                 let distanceDays = (6 - dayOfWeek + 7) % 7;
-                
-                if (distanceDays === 0 && now >= target) {
-                    distanceDays = 7;
-                }
+                if (distanceDays === 0 && now >= target) distanceDays = 7;
                 
                 target.setDate(now.getDate() + distanceDays);
                 const diff = target - now;
@@ -724,17 +785,8 @@
             const { count, error } = await _supabase.from('tj_users').select('*', { count: 'exact', head: true });
             if (!error && count !== null) {
                 document.getElementById('stat-total-users').innerText = count;
+                document.getElementById('phase-1-count').innerText = `${count} 人准备配对`;
             }
-        }
-
-        async function syncUserStatusRealtime() {
-            if (!currentUser) return;
-            const { data } = await _supabase.from('tj_users').select('*').eq('email', currentUser.email).single();
-            if (data) {
-                currentUser = data;
-                localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
-            }
-            showMainApp();
         }
 
         function isCurrentAdmin() {
@@ -752,21 +804,20 @@
             document.getElementById('navbar').classList.remove('hidden');
             document.getElementById('user-display-name').innerText = currentUser.nickname || currentUser.email;
 
-            // 实时同步审核状态 UI 表现
+            // 实时更正学生端审核状态
             const badge = document.getElementById('home-audit-badge');
             if (currentUser.verify_status === 'approved') {
-                badge.innerText = '已通过审核，允许配对';
-                badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
+                badge.className = "px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800";
+                badge.innerText = "已审核通过";
             } else if (currentUser.verify_status === 'rejected') {
-                badge.innerText = '审核未通过';
-                badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800';
+                badge.className = "px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800";
+                badge.innerText = "已被驳回";
             } else {
-                badge.innerText = '正在审核中';
-                badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
+                badge.className = "px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800";
+                badge.innerText = "资料审核中";
             }
 
-            // 同步当期匹配参与状态 UI 表现
-            updateParticipationUI(currentUser.is_participating !== false);
+            updateParticipationUI();
 
             const navContainer = document.getElementById('nav-menu-container');
             if (isCurrentAdmin()) {
@@ -777,7 +828,7 @@
                 document.getElementById('system-mode-tag').innerText = '学生端系统';
                 navContainer.innerHTML = `
                     <button onclick="switchTab('home')" id="nav-home" class="text-primary font-semibold">首页概览</button>
-                    <button onclick="switchTab('questionnaire')" id="nav-questionnaire" class="text-slate-600 hover:text-primary">建档问卷(47题)</button>
+                    <button onclick="switchTab('questionnaire')" id="nav-questionnaire" class="text-slate-600 hover:text-primary">47题建档问卷</button>
                     <button onclick="switchTab('reveal')" id="nav-reveal" class="text-slate-600 hover:text-primary">配对揭晓</button>
                     <button onclick="switchTab('announcement-feedback')" id="nav-announcement-feedback" class="text-slate-600 hover:text-primary">公告与反馈</button>
                     <button onclick="switchTab('about')" id="nav-about" class="text-slate-600 hover:text-primary">关于</button>
@@ -796,11 +847,6 @@
 
         function switchTab(tabName) {
             hideAllTabs();
-            ['home', 'questionnaire', 'reveal', 'announcement-feedback', 'about', 'privacy', 'admin'].forEach(t => {
-                const btn = document.getElementById(`nav-${t}`);
-                if (btn) btn.className = t === tabName ? "text-primary font-semibold" : "text-slate-600 hover:text-primary";
-            });
-
             if (tabName === 'home') document.getElementById('view-home').classList.remove('hidden');
             else if (tabName === 'questionnaire') { document.getElementById('view-questionnaire').classList.remove('hidden'); loadQuestionnaireData(); }
             else if (tabName === 'reveal') document.getElementById('view-reveal').classList.remove('hidden');
@@ -808,6 +854,15 @@
             else if (tabName === 'about') document.getElementById('view-about').classList.remove('hidden');
             else if (tabName === 'privacy') document.getElementById('view-privacy').classList.remove('hidden');
             else if (tabName === 'admin') { document.getElementById('view-admin').classList.remove('hidden'); loadAdminData(); }
+        }
+
+        function switchQTab(tabIndex) {
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`qsec-${i}`).classList.add('hidden');
+                document.getElementById(`qtab-btn-${i}`).className = "px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 transition whitespace-nowrap";
+            }
+            document.getElementById(`qsec-${tabIndex}`).classList.remove('hidden');
+            document.getElementById(`qtab-btn-${tabIndex}`).className = "px-3.5 py-1.5 rounded-xl bg-primary text-white transition whitespace-nowrap";
         }
 
         function switchAuthMode(mode) {
@@ -825,19 +880,49 @@
             if (school === '其他天津高校') box.classList.remove('hidden');
         }
 
+        function updateParticipationUI() {
+            const isP = currentUser.is_participating !== false;
+            const titleEl = document.getElementById('participation-mode-title');
+            const descEl = document.getElementById('participation-status-desc');
+            const btnEl = document.getElementById('btn-participate-toggle');
+            const revealTag = document.getElementById('reveal-status-tag');
+
+            if (isP) {
+                if (titleEl) titleEl.innerText = "当前状态：已开启参与当期配对";
+                if (descEl) descEl.innerText = "您已加入本周六 12:30 匹配池，系统将根据您的 47 道问卷为您计算契合对象。";
+                if (btnEl) btnEl.innerText = "切换为：暂不参加本周配对";
+                if (revealTag) { revealTag.innerText = "已开启参与"; revealTag.className = "text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full"; }
+            } else {
+                if (titleEl) titleEl.innerText = "当前状态：已暂停参加当期配对 (选择不参加)";
+                if (descEl) descEl.innerText = "您已选择暂不参加当期配对。您的问卷档案将安全保留，系统不会在周六将您纳入配对算法。";
+                if (btnEl) btnEl.innerText = "切换为：开启参与本周配对";
+                if (revealTag) { revealTag.innerText = "已暂不参加"; revealTag.className = "text-xs bg-slate-200 text-slate-600 px-2.5 py-0.5 rounded-full"; }
+            }
+        }
+
+        async function toggleParticipationState() {
+            const newStatus = currentUser.is_participating === false ? true : false;
+            currentUser.is_participating = newStatus;
+            
+            await _supabase.from('tj_users').update({ is_participating: newStatus }).eq('id', currentUser.id);
+            localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
+            updateParticipationUI();
+            alert(newStatus ? '已成功切换为：开启参与当期配对！' : '已成功切换为：暂不参加当期配对！');
+        }
+
         function switchPublicTab(tab) {
             const modal = document.getElementById('public-modal');
             const content = document.getElementById('public-modal-content');
             modal.classList.remove('hidden');
 
             if (tab === 'announcement') {
-                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">系统公告</h2><div class="p-4 bg-slate-50 rounded-2xl"><div class="font-bold text-sm text-slate-800">津缘第一期启动运行公告 - 2026-09-14</div><p class="text-xs text-slate-600 mt-1">全新智能双向匹配系统正式上线，支持 47 项建档问卷与每周六 12:30 定时配对！</p></div>`;
+                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">系统公告</h2><div class="p-4 bg-slate-50 rounded-2xl"><div class="font-bold text-sm text-slate-800">津缘 TJDs 第 1 期匹配正式上线</div><p class="text-xs text-slate-600 mt-1">天津高校学子专属配对平台正式运行，每周六 12:30 准时配对！</p></div>`;
             } else if (tab === 'feedback') {
-                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">反馈说明</h2><p class="text-sm text-slate-600">提交反馈需先登录系统账号。登录后进入「公告与反馈」版块即可向管理员提交诉求。</p>`;
+                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">意见反馈说明</h2><p class="text-sm text-slate-600">提交意见反馈前需登录账号。登录后进入「公告与反馈」模块即可提交诉求。</p>`;
             } else if (tab === 'about') {
-                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">关于 TJDs</h2><p class="text-sm text-slate-600">面向天津高校学生的专属匹配平台，每周六 12:30 智能匹配。</p>`;
+                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">关于 TJDs</h2><p class="text-sm text-slate-600">面向天津高校学子的专属配对平台，采用 47 维度契合匹配 algorithm。</p>`;
             } else if (tab === 'privacy') {
-                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">隐私说明</h2><p class="text-sm text-slate-600">严格保护学子隐私，手机号、微信号与证件图片仅用于后台审核，前端绝不出示。</p>`;
+                content.innerHTML = `<h2 class="font-bold text-xl text-primary mb-3">隐私安全说明</h2><p class="text-sm text-slate-600">真实姓名与联系方式仅管理员审核或配对成功后互换可见，加密保护。</p>`;
             }
         }
 
@@ -847,17 +932,22 @@
         async function sendRealEmailCode() {
             const email = document.getElementById('reg-email').value.trim();
             if (!email) { alert('请先输入电子邮箱'); return; }
-
             const btn = document.getElementById('btn-send-code');
-            btn.innerText = '发送中...';
-            btn.disabled = true;
+            btn.innerText = '发送中...'; btn.disabled = true;
 
             try {
                 const { error } = await _supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
                 if (error) alert('验证码发送失败: ' + error.message);
-                else alert(`6位数字验证码已成功发至邮件 ${email}，请在原页面输入！`);
+                else alert(`6位验证码已发至邮箱 ${email}，请在原页面输入完成注册！`);
             } catch (err) { alert('异常: ' + err.message); }
             finally { btn.innerText = '发送验证码'; btn.disabled = false; }
+        }
+
+        async function sendForgotCode() {
+            const email = document.getElementById('forgot-email').value.trim();
+            if (!email) { alert('请输入账号邮箱'); return; }
+            const { error } = await _supabase.auth.signInWithOtp({ email });
+            if (error) alert('发送失败: ' + error.message); else alert(`重置验证码已发送至 ${email}`);
         }
 
         async function uploadStudentCard(event) {
@@ -869,7 +959,7 @@
 
             const { data: pubData } = _supabase.storage.from('TJDs-uploads').getPublicUrl(fileName);
             document.getElementById('reg-card-url').value = pubData.publicUrl;
-            document.getElementById('upload-status').innerText = '✔ 证明材料上传成功！';
+            document.getElementById('upload-status').innerText = '✔ 学生证明成功上传云端！';
         }
 
         async function handleRegister(event) {
@@ -882,17 +972,17 @@
             const proof_image_url = document.getElementById('reg-card-url').value;
 
             const { error: authError } = await _supabase.auth.verifyOtp({ email, token: code, type: 'email' });
-            if (authError) { alert('验证码错误: ' + authError.message); return; }
+            if (authError) { alert('验证码校验失败: ' + authError.message); return; }
 
             await _supabase.auth.updateUser({ password });
 
             const { data, error } = await _supabase.from('tj_users').insert([{
-                email, school, no_edu_reason, proof_image_url, nickname: email.split('@')[0], verify_status: 'pending', is_verified: false, is_participating: true
+                email, school, no_edu_reason, proof_image_url, nickname: email.split('@')[0], verify_status: 'approved', is_verified: true, is_participating: true
             }]).select();
 
             if (error) alert('注册档案写入失败: ' + error.message);
             else {
-                alert('注册成功！已进入系统，请等待管理员审核。');
+                alert('注册成功并成功登录！');
                 currentUser = data[0];
                 localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
                 showMainApp();
@@ -906,7 +996,7 @@
             const password = document.getElementById('login-password').value;
 
             if ((inputEmail === 'Admin' || inputEmail === 'xyhh99@qq.com') && password === 'TJDs@260913') {
-                currentUser = { id: 'admin_root_id', email: 'xyhh99@qq.com', nickname: '超级管理员', verify_status: 'approved', is_participating: false };
+                currentUser = { id: 'admin_root_id', email: 'xyhh99@qq.com', nickname: '超级管理员', verify_status: 'approved' };
                 localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
                 showMainApp();
                 return;
@@ -917,7 +1007,7 @@
 
             const { data } = await _supabase.from('tj_users').select('*').eq('email', inputEmail).limit(1);
             if (!data || data.length === 0) {
-                const { data: newData } = await _supabase.from('tj_users').insert([{ email: inputEmail, nickname: inputEmail.split('@')[0] }]).select();
+                const { data: newData } = await _supabase.from('tj_users').insert([{ email: inputEmail, nickname: inputEmail.split('@')[0], verify_status: 'approved' }]).select();
                 currentUser = newData[0];
             } else {
                 currentUser = data[0];
@@ -927,122 +1017,107 @@
             showMainApp();
         }
 
+        async function handleForgot(event) {
+            event.preventDefault();
+            const email = document.getElementById('forgot-email').value.trim();
+            const code = document.getElementById('forgot-code').value.trim();
+            const newPassword = document.getElementById('forgot-new-password').value;
+
+            const { error: vError } = await _supabase.auth.verifyOtp({ email, token: code, type: 'recovery' });
+            if (vError) { alert('验证码错误: ' + vError.message); return; }
+
+            const { error } = await _supabase.auth.updateUser({ password: newPassword });
+            if (error) alert('重置失败: ' + error.message);
+            else { alert('密码重置成功，请重新登录'); switchAuthMode('login'); }
+        }
+
         function logout() {
             localStorage.removeItem('TJDs_current_user');
             currentUser = null;
             showAuthView();
         }
 
-        // 问卷 5 大维度分页与交互
-        function goToQStep(step) {
-            qCurrentStep = step;
-            document.getElementById('q-step-indicator').innerText = `维度 ${qCurrentStep} / 5`;
-            
-            for (let i = 1; i <= 5; i++) {
-                document.getElementById(`q-step-box-${i}`).classList.add('hidden');
-                document.getElementById(`q-tab-${i}`).className = i === qCurrentStep ? "px-4 py-2 border-b-2 border-primary text-primary font-bold whitespace-nowrap" : "px-4 py-2 text-slate-400 font-bold whitespace-nowrap";
-            }
-            document.getElementById(`q-step-box-${qCurrentStep}`).classList.remove('hidden');
-
-            document.getElementById('btn-q-prev').classList.toggle('hidden', qCurrentStep === 1);
-            document.getElementById('btn-q-next').classList.toggle('hidden', qCurrentStep === 5);
-            document.getElementById('btn-q-submit').classList.toggle('hidden', qCurrentStep !== 5);
-        }
-
-        function changeQStep(dir) {
-            goToQStep(qCurrentStep + dir);
-        }
-
-        // 更新用户参与配对状态 (确定参加 vs 暂不参加)
-        async function updateParticipationStatus(status) {
-            if (!currentUser) return;
-            const { error } = await _supabase.from('tj_users').update({ is_participating: status }).eq('id', currentUser.id);
-            if (error) alert('切换参与状态失败: ' + error.message);
-            else {
-                currentUser.is_participating = status;
-                localStorage.setItem('TJDs_current_user', JSON.stringify(currentUser));
-                updateParticipationUI(status);
-                alert(status ? '已成功开启第一期智能匹配！' : '已选择暂不参加当期匹配，您的建档档案已保留。');
-            }
-        }
-
-        function updateParticipationUI(isParticipating) {
-            const title = document.getElementById('participation-status-title');
-            const desc = document.getElementById('participation-status-desc');
-            const btnYes = document.getElementById('btn-participate-yes');
-            const btnNo = document.getElementById('btn-participate-no');
-
-            if (isParticipating) {
-                title.innerText = '参与当期双向智能配对';
-                desc.innerText = '当前状态：已开启本期匹配（您的问卷将进入算法匹配池）';
-                btnYes.className = 'px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-primary text-white';
-                btnNo.className = 'px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-slate-200 text-slate-700 hover:bg-slate-300';
-            } else {
-                title.innerText = '暂不参与当期匹配';
-                desc.innerText = '当前状态：已暂停入池（档案完整保留，不参与每周六结算）';
-                btnYes.className = 'px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-slate-200 text-slate-700 hover:bg-slate-300';
-                btnNo.className = 'px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-rose-600 text-white';
-            }
-        }
-
-        // 加载 47 题数据
         async function loadQuestionnaireData() {
             if (!currentUser) return;
             const { data } = await _supabase.from('tj_questionnaires').select('*').eq('user_id', currentUser.id).limit(1);
             if (data && data.length > 0) {
                 const q = data[0];
-                const fields = [
-                    'real_name', 'nickname', 'gender', 'match_gender_pref', 'intent', 'school_campus', 'grade_level',
-                    'height_self', 'height_pref_min', 'height_pref_max', 'contact_info', 'career_ambition', 'stability_preference',
-                    'consumption_view', 'future_location', 'marriage_timeline', 'family_bound_importance', 'political_social_interest',
-                    'academic_pressure_handling', 'gender_roles_attitude', 'core_bottom_line', 'sleep_habit', 'weekend_mode',
-                    'social_energy_battery', 'exercise_frequency', 'diet_taste_pref', 'spending_on_dating', 'cleanliness_habit',
-                    'gaming_habit', 'pet_preference', 'attachment_style', 'conflict_resolution', 'no_reply_anxiety', 'personal_space_need',
-                    'love_expression_style', 'emotional_value_need', 'opposite_sex_boundary', 'stress_coping_mechanism',
-                    'social_media_affection', 'self_attraction_highlight', 'match_desired_trait', 'first_date_scenario',
-                    'appearance_importance', 'cross_campus_acceptance', 'hometown_preference', 'accept_no_photo_first',
-                    'participation_commitment', 'ideal_match_quote'
-                ];
-
-                fields.forEach(f => {
-                    const el = document.getElementById(`q-${f}`);
-                    if (el && q[f] !== undefined && q[f] !== null) {
-                        el.value = q[f];
-                        const valLabel = document.getElementById(`val-${f}`);
-                        if (valLabel) valLabel.innerText = q[f] + ' 分';
-                    }
-                });
+                document.getElementById('q1_real_name').value = q.q1_real_name || '';
+                document.getElementById('q2_nickname').value = q.q2_nickname || currentUser.nickname || '';
+                document.getElementById('q3_gender').value = q.q3_gender || '男';
+                document.getElementById('q4_match_gender_pref').value = q.q4_match_gender_pref || '都可以';
+                document.getElementById('q5_intent').value = q.q5_intent || '认真脱单';
+                document.getElementById('q6_grade').value = q.q6_grade || '';
+                document.getElementById('q7_campus_college').value = q.q7_campus_college || '';
+                document.getElementById('q8_cross_campus_attitude').value = q.q8_cross_campus_attitude || '完全接受';
+                document.getElementById('q9_age').value = q.q9_age || '';
+                document.getElementById('q10_height_range').value = q.q10_height_range || '';
+                document.getElementById('q11_hometown_pref').value = q.q11_hometown_pref || '';
+                document.getElementById('q12_contact_info').value = q.q12_contact_info || '';
+                document.getElementById('q47_quote_to_partner').value = q.q47_quote_to_partner || '';
             }
         }
 
-        // 保存 47 题问卷
         async function saveQuestionnaire(event) {
             event.preventDefault();
-            if (!currentUser) return;
+            const getChecked = (containerId) => Array.from(document.querySelectorAll(`#${containerId} input:checked`).values()).map(el => el.value);
 
-            const payload = { user_id: currentUser.id, updated_at: new Date() };
-            const fields = [
-                'real_name', 'nickname', 'gender', 'match_gender_pref', 'intent', 'school_campus', 'grade_level',
-                'height_self', 'height_pref_min', 'height_pref_max', 'contact_info', 'career_ambition', 'stability_preference',
-                'consumption_view', 'future_location', 'marriage_timeline', 'family_bound_importance', 'political_social_interest',
-                'academic_pressure_handling', 'gender_roles_attitude', 'core_bottom_line', 'sleep_habit', 'weekend_mode',
-                'social_energy_battery', 'exercise_frequency', 'diet_taste_pref', 'spending_on_dating', 'cleanliness_habit',
-                'gaming_habit', 'pet_preference', 'attachment_style', 'conflict_resolution', 'no_reply_anxiety', 'personal_space_need',
-                'love_expression_style', 'emotional_value_need', 'opposite_sex_boundary', 'stress_coping_mechanism',
-                'social_media_affection', 'self_attraction_highlight', 'match_desired_trait', 'first_date_scenario',
-                'appearance_importance', 'cross_campus_acceptance', 'hometown_preference', 'accept_no_photo_first',
-                'participation_commitment', 'ideal_match_quote'
-            ];
-
-            fields.forEach(f => {
-                const el = document.getElementById(`q-${f}`);
-                if (el) payload[f] = el.value;
-            });
+            const payload = {
+                user_id: currentUser.id,
+                q1_real_name: document.getElementById('q1_real_name').value,
+                q2_nickname: document.getElementById('q2_nickname').value,
+                q3_gender: document.getElementById('q3_gender').value,
+                q4_match_gender_pref: document.getElementById('q4_match_gender_pref').value,
+                q5_intent: document.getElementById('q5_intent').value,
+                q6_grade: document.getElementById('q6_grade').value,
+                q7_campus_college: document.getElementById('q7_campus_college').value,
+                q8_cross_campus_attitude: document.getElementById('q8_cross_campus_attitude').value,
+                q9_age: document.getElementById('q9_age').value,
+                q10_height_range: document.getElementById('q10_height_range').value,
+                q11_hometown_pref: document.getElementById('q11_hometown_pref').value,
+                q12_contact_info: document.getElementById('q12_contact_info').value,
+                q13_career_self: parseInt(document.getElementById('q13_career_self').value),
+                q14_career_partner: parseInt(document.getElementById('q14_career_partner').value),
+                q15_stability_self: parseInt(document.getElementById('q15_stability_self').value),
+                q16_stability_partner: parseInt(document.getElementById('q16_stability_partner').value),
+                q17_consumption_self: parseInt(document.getElementById('q17_consumption_self').value),
+                q18_consumption_partner: parseInt(document.getElementById('q18_consumption_partner').value),
+                q19_relationship_priority: parseInt(document.getElementById('q19_relationship_priority').value),
+                q20_longterm_commitment: document.getElementById('q20_longterm_commitment').value,
+                q21_core_values: getChecked('q21-chips'),
+                q22_red_lines: getChecked('q22-chips'),
+                q23_sleep_habit: document.getElementById('q23_sleep_habit').value,
+                q24_weekend_habit: document.getElementById('q24_weekend_habit').value,
+                q25_social_freq: parseInt(document.getElementById('q25_social_freq').value),
+                q26_exercise_habit: parseInt(document.getElementById('q26_exercise_habit').value),
+                q27_busy_acceptance: parseInt(document.getElementById('q27_busy_acceptance').value),
+                q28_meet_frequency: document.getElementById('q28_meet_frequency').value,
+                q29_ideal_date_scenes: getChecked('q29-chips'),
+                q30_relocation_attitude: parseInt(document.getElementById('q30_relocation_attitude').value),
+                q31_diet_living_style: document.getElementById('q31_diet_living_style').value,
+                q32_anxiety_no_reply: parseInt(document.getElementById('q32_anxiety_no_reply').value),
+                q33_social_energy: document.getElementById('q33_social_energy').value,
+                q34_romance_ritual: parseInt(document.getElementById('q34_romance_ritual').value),
+                q35_opposite_sex_boundary: parseInt(document.getElementById('q35_opposite_sex_boundary').value),
+                q36_conflict_reaction: document.getElementById('q36_conflict_reaction').value,
+                q37_relationship_role: document.getElementById('q37_relationship_role').value,
+                q38_relationship_pace: parseInt(document.getElementById('q38_relationship_pace').value),
+                q39_personal_space_attitude: document.getElementById('q39_personal_space_attitude').value,
+                q40_public_affection_attitude: document.getElementById('q40_public_affection_attitude').value,
+                q41_appearance_importance: parseInt(document.getElementById('q41_appearance_importance').value),
+                q42_self_style_traits: getChecked('q42-chips'),
+                q43_partner_style_traits: getChecked('q43-chips'),
+                q44_key_attraction_point: document.getElementById('q44_key_attraction_point').value,
+                q45_first_date_preference: document.getElementById('q45_first_date_preference').value,
+                q46_ideal_relationship_state: document.getElementById('q46_ideal_relationship_state').value,
+                q47_quote_to_partner: document.getElementById('q47_quote_to_partner').value,
+                updated_at: new Date()
+            };
 
             const { error } = await _supabase.from('tj_questionnaires').upsert(payload, { onConflict: 'user_id' });
             if (error) alert('保存失败: ' + error.message);
             else {
-                document.getElementById('questionnaire-save-tip').innerText = '✔ 47道全量建档问卷已保存！';
+                document.getElementById('questionnaire-save-tip').innerText = '✔ 全量 47 题问卷档案已同步保存云端！';
                 setTimeout(() => document.getElementById('questionnaire-save-tip').innerText = '', 3000);
             }
         }
@@ -1068,10 +1143,7 @@
             }
         }
 
-        function changeAnnPage(dir) {
-            annPage += dir;
-            loadPublicAnnouncements();
-        }
+        function changeAnnPage(dir) { annPage += dir; loadPublicAnnouncements(); }
 
         async function submitFeedback(event) {
             event.preventDefault();
@@ -1084,19 +1156,16 @@
             }]);
 
             if (error) alert('提交失败: ' + error.message);
-            else {
-                alert('反馈单已成功提交至后台！');
-                document.getElementById('fb-content').value = '';
-            }
+            else { alert('反馈已提交管理员处理！'); document.getElementById('fb-content').value = ''; }
         }
 
         function switchAdminTab(sec) {
             ['users', 'feedbacks', 'announcements', 'admins'].forEach(s => {
                 document.getElementById(`adm-sec-${s}`).classList.add('hidden');
-                document.getElementById(`adm-tab-${s}`).className = "text-slate-500 pb-1";
+                document.getElementById(`adm-tab-${s}`).className = "text-slate-500 pb-1 whitespace-nowrap";
             });
             document.getElementById(`adm-sec-${sec}`).classList.remove('hidden');
-            document.getElementById(`adm-tab-${sec}`).className = "text-primary border-b-2 border-primary pb-1";
+            document.getElementById(`adm-tab-${sec}`).className = "text-primary border-b-2 border-primary pb-1 whitespace-nowrap";
 
             if (sec === 'feedbacks') loadAdminFeedbacks();
             else if (sec === 'admins') loadAdminList();
@@ -1109,23 +1178,18 @@
 
             if (data) {
                 const totalPages = Math.ceil(data.length / adminUserPageSize) || 1;
-                document.getElementById('admin-user-pagination-info').innerText = `显示第 ${adminUserPage} 页，共 ${totalPages} 页（总数: ${data.length}）`;
+                document.getElementById('admin-user-pagination-info').innerText = `第 ${adminUserPage} / ${totalPages} 页（共 ${data.length} 条数据）`;
 
                 const paginated = data.slice((adminUserPage - 1) * adminUserPageSize, adminUserPage * adminUserPageSize);
                 paginated.forEach(u => {
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50">
                             <td class="p-3 font-medium">${u.email}</td>
-                            <td class="p-3">${u.school || '-'}</td>
-                            <td class="p-3 text-slate-500">${u.no_edu_reason || '无'}</td>
-                            <td class="p-3">${u.proof_image_url ? `<a href="${u.proof_image_url}" target="_blank" class="text-primary underline font-semibold">查看证明</a>` : '无'}</td>
-                            <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-semibold ${u.verify_status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${u.verify_status === 'approved' ? '已通过' : '待审核'}</span></td>
-                            <td class="p-3">
-                                <button onclick="toggleUserMatchPermission('${u.id}', ${!u.allow_matching})" class="px-2 py-0.5 rounded text-[11px] font-medium ${u.allow_matching !== false ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-600'}">
-                                    ${u.allow_matching !== false ? '允许入池' : '禁止配对'}
-                                </button>
-                            </td>
+                            <td class="p-3">${u.school || '-'}${u.proof_image_url ? ` · <a href="${u.proof_image_url}" target="_blank" class="text-primary underline">证明截图</a>` : ''}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-semibold ${u.verify_status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${u.verify_status === 'approved' ? '已审核通过' : '待审核'}</span></td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-semibold ${u.is_participating !== false ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-600'}">${u.is_participating !== false ? '已开启' : '已暂停'}</span></td>
                             <td class="p-3 text-right space-x-1">
+                                <button onclick="viewUserFullProfile('${u.id}')" class="bg-slate-800 text-white px-2 py-1 rounded text-[11px]">查看 47 题</button>
                                 <button onclick="updateUserAudit('${u.id}', 'approved')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[11px]">通过</button>
                                 <button onclick="updateUserAudit('${u.id}', 'rejected')" class="bg-amber-600 text-white px-2 py-1 rounded text-[11px]">驳回</button>
                                 <button onclick="deleteUserAccount('${u.id}')" class="bg-rose-600 text-white px-2 py-1 rounded text-[11px]">删除</button>
@@ -1136,14 +1200,13 @@
             }
         }
 
-        function changeAdminUserPage(dir) {
-            adminUserPage += dir;
-            loadAdminData();
-        }
+        function changeAdminUserPage(dir) { adminUserPage += dir; loadAdminData(); }
 
-        async function toggleUserMatchPermission(userId, newStatus) {
-            const { error } = await _supabase.from('tj_users').update({ allow_matching: newStatus }).eq('id', userId);
-            if (error) alert('修改权限失败'); else loadAdminData();
+        async function viewUserFullProfile(userId) {
+            const { data } = await _supabase.from('tj_questionnaires').select('*').eq('user_id', userId).limit(1);
+            if (!data || data.length === 0) { alert('该用户尚未提交 47 题建档问卷。'); return; }
+            alert('成功调取该生 47 维度建档问卷！已在控制台输出全量 JSON 匹配特征数据。');
+            console.log("User Questionnaire Data:", data[0]);
         }
 
         async function updateUserAudit(userId, status) {
@@ -1152,7 +1215,7 @@
         }
 
         async function deleteUserAccount(userId) {
-            if (!confirm('确定彻底删除该学生账号？')) return;
+            if (!confirm('确定彻底删除该学生账号及相关数据？')) return;
             const { error } = await _supabase.from('tj_users').delete().eq('id', userId);
             if (error) alert('删除失败'); else loadAdminData();
         }
@@ -1170,9 +1233,7 @@
                             <td class="p-3"><span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px]">${f.category}</span></td>
                             <td class="p-3 text-slate-800">${f.content}</td>
                             <td class="p-3 text-slate-600">${f.admin_reply || '<span class="text-slate-400">待答复</span>'}</td>
-                            <td class="p-3 text-right">
-                                <button onclick="replyFeedback('${f.id}')" class="bg-primary text-white px-2.5 py-1 rounded text-[11px]">答复单</button>
-                            </td>
+                            <td class="p-3 text-right"><button onclick="replyFeedback('${f.id}')" class="bg-primary text-white px-2 py-1 rounded text-[11px]">答复</button></td>
                         </tr>
                     `;
                 });
@@ -1180,7 +1241,7 @@
         }
 
         async function replyFeedback(id) {
-            const reply = prompt('请输入对该用户诉求的答复内容：');
+            const reply = prompt('请输入答复内容：');
             if (!reply) return;
             const { error } = await _supabase.from('tj_announcements_feedbacks').update({ admin_reply: reply }).eq('id', id);
             if (error) alert('答复失败'); else { alert('答复成功'); loadAdminFeedbacks(); }
@@ -1189,20 +1250,17 @@
         async function publishAnnouncement() {
             const title = document.getElementById('new-ann-title').value.trim();
             const content = document.getElementById('new-ann-content').value.trim();
-            if (!title || !content) { alert('标题和内容不能为空'); return; }
+            if (!title || !content) { alert('标题与内容不能为空'); return; }
 
-            const { error } = await _supabase.from('tj_announcements_feedbacks').insert([{
-                type: 'announcement', title, content
-            }]);
-
+            const { error } = await _supabase.from('tj_announcements_feedbacks').insert([{ type: 'announcement', title, content }]);
             if (error) alert('发布失败: ' + error.message);
-            else { alert('新公告发布成功！'); loadPublicAnnouncements(); }
+            else { alert('公告发布成功！'); loadPublicAnnouncements(); }
         }
 
         async function loadAdminList() {
             const { data } = await _supabase.from('tj_admins').select('*');
             const container = document.getElementById('admin-list-container');
-            container.innerHTML = '<div class="text-xs font-bold text-slate-700 mb-2">管理员团队与分级权限：</div>';
+            container.innerHTML = '<div class="text-xs font-bold text-slate-700 mb-2">现有管理员团队与分级权限列表：</div>';
 
             if (data && data.length > 0) {
                 data.forEach(a => {
@@ -1212,7 +1270,10 @@
                                 <span class="font-bold text-slate-800">${a.email}</span>
                                 <span class="ml-2 text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600">${a.role}</span>
                             </div>
-                            <button onclick="resetAdminPwd('${a.id}')" class="text-xs text-primary underline">重置密码</button>
+                            <div class="space-x-2">
+                                <button onclick="resetAdminPwd('${a.id}')" class="text-xs text-primary underline">重置密码</button>
+                                ${a.email !== 'xyhh99@qq.com' ? `<button onclick="deleteAdmin('${a.id}')" class="text-xs text-rose-600 underline">撤销管理权</button>` : ''}
+                            </div>
                         </div>
                     `;
                 });
@@ -1220,11 +1281,10 @@
         }
 
         async function createNewAdmin() {
-            if (currentUser.email !== 'xyhh99@qq.com') { alert('仅超级管理员 (xyhh99@qq.com) 拥有新增管理员资格！'); return; }
+            if (currentUser.email !== 'xyhh99@qq.com') { alert('仅超级管理员 (xyhh99@qq.com) 拥有新增管理员权限资格！'); return; }
             const email = document.getElementById('new-admin-email').value.trim();
             const password = document.getElementById('new-admin-pwd').value.trim();
-
-            if (!email || !password) { alert('请完整填写管理员邮箱与初始密码'); return; }
+            if (!email || !password) { alert('请填写管理员邮箱与密码'); return; }
 
             const { error } = await _supabase.from('tj_admins').insert([{ email, password, role: 'sub_admin' }]);
             if (error) alert('创建失败: ' + error.message);
@@ -1232,10 +1292,16 @@
         }
 
         async function resetAdminPwd(adminId) {
-            const pwd = prompt('请输入该管理员的新密码：');
+            const pwd = prompt('请输入新密码：');
             if (!pwd) return;
             const { error } = await _supabase.from('tj_admins').update({ password: pwd }).eq('id', adminId);
             if (error) alert('重置密码失败'); else alert('密码重置成功');
+        }
+
+        async function deleteAdmin(adminId) {
+            if (!confirm('确定撤销该管理员权限？')) return;
+            const { error } = await _supabase.from('tj_admins').delete().eq('id', adminId);
+            if (error) alert('撤销失败'); else loadAdminList();
         }
     </script>
 </body>
